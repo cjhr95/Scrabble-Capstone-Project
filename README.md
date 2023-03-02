@@ -18,6 +18,9 @@ This variant of scrabble is aimed to be a speed-focused scrabble. One where each
     
     Tile - A singular cell in the grid
 
+## How to play
+    You don't... yet anyways.
+
 ## Features
 ### Implemented
     literally nothing lol
