@@ -96,6 +96,7 @@ public class GridManager : MonoBehaviour
         {
           score += t.pointValue;
           score = t.PointModifier(score);
+          t.ChangeColor(Color.red);
           t.LockTyping();
         }
         Debug.Log(score);
@@ -167,6 +168,7 @@ public class GridManager : MonoBehaviour
         {
           score += t.pointValue;
           score = t.PointModifier(score);
+          t.ChangeColor(Color.red);
           t.LockTyping();
         }
         Debug.Log(score);

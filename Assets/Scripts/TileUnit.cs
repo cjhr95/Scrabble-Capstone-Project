@@ -95,6 +95,11 @@ public class TileUnit : MonoBehaviour
     }
   }
 
+  public void ChangeColor(Color c)
+  {
+    renderer.color = c;
+  }
+
   public void LockTyping()
   {
     locked = true;
