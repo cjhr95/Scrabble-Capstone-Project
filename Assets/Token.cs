@@ -34,7 +34,7 @@ namespace Assets
     public void Initialize(string letter)
     {
       tokenLetter = letter.ToUpper();
-      text.text = letter;
+      text.text = tokenLetter;
 
       LetterValues letterVal;
       if (Enum.TryParse(tokenLetter, out letterVal))
