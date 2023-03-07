@@ -4,17 +4,21 @@ using UnityEngine;
 
 public class GridManager : MonoBehaviour
 {
-  [SerializeField] public int width, height;
-  [SerializeField] private TileUnit tilePrefab;
-  private TileUnit[,] tiles;
+  // ####################################### General Variables #######################################
+  [SerializeField] public int width, height;            // Width and Height of the grid (in tiles)
+  [SerializeField] private TileUnit tilePrefab;         // Placeholder to access the tile prefab
+  private TileUnit[,] tiles;                            // Grid array
+  public bool firstWordPlaced { get; private set; }     // Flag to force first word to intersect center.
+  private Vector2 centerOfGrid;                         // Location of the center of tile array.
 
-  private Vector2 activeTile;
-  private int minIndex;
-  public bool isTypingHorizontal { get; private set; }
-  public bool isTypingVertical { get; private set; }
-  private int typeOffset;
-  private string currentWord;
-  private List<TileUnit> wordTiles;
+  // ######################################### Typing helpers #########################################
+  private Vector2 activeTile;                           // Originating tile for typing.
+  private int minIndex;                                 // Minimum index to prevent over-erasing
+  public bool isTypingHorizontal { get; private set; }  // Reference to determine direction of typing
+  public bool isTypingVertical { get; private set; }    // See above
+  private int typeOffset;                               // The offset from originiating tile.
+  private string currentWord;                           // The current "working" word user is typing.
+  private List<TileUnit> wordTiles;                     // The tiles that the player has written on. This is *in order*
   
   // Description: Generates a grid based on the width
   //              and height fields. Also fills out
@@ -25,6 +29,8 @@ public class GridManager : MonoBehaviour
     wordTiles = new List<TileUnit>();
     isTypingHorizontal = false;
     isTypingVertical = false;
+    firstWordPlaced = false;
+    centerOfGrid = new Vector2(width / 2, height / 2);
     typeOffset = 0;
     for (int x = 0; x < width; x++)
     {
@@ -38,6 +44,8 @@ public class GridManager : MonoBehaviour
 
         // TODO: Add logic to determine if tile is special.
         createdTile.Initialize(new Vector2(x, y), new Vector2(x, y));
+        if (createdTile.gridPoint == centerOfGrid)
+          createdTile.ChangeColor(Color.gray);
       }
     }
   }
@@ -55,13 +63,15 @@ public class GridManager : MonoBehaviour
   void Update()
   {
 
-    // ################### Typing Logic ###################
+    // ####################################### Typing Logic #######################################
+    // ######################################## Horzontal #########################################
     if (isTypingHorizontal)
     {
       // Code will check if enter/backspace is pressed. If not,
       // then it checks what the user is typing in.
       if (Input.GetKeyDown(KeyCode.Backspace))
       {
+        // Skip over locked tiles that already have letters
         if ((int)activeTile.x + typeOffset > minIndex) typeOffset--;
         int xPos = (int)activeTile.x + typeOffset;
         while (tiles[xPos, (int)activeTile.y].locked && xPos > minIndex)
@@ -69,16 +79,20 @@ public class GridManager : MonoBehaviour
           typeOffset--;
           xPos = (int)activeTile.x + typeOffset;
         }
+
+        // Only empty unlocked tiles.
         if (!tiles[xPos, (int)activeTile.y].locked)
         {
           tiles[xPos, (int)activeTile.y].ChangeLetter("");
+          wordTiles.RemoveAt(wordTiles.Count - 1);
           currentWord = currentWord.Remove(currentWord.Length - 1, 1);
         }
       }
       else if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
       {
         isTypingHorizontal = false;
-        // Check if there is a letter afterwards.
+
+        // Check if there is a letter afterwards and add them to word if needed.
         int xPos = (int)activeTile.x + typeOffset;
         while (xPos < width && tiles[xPos, (int)activeTile.y].GetLetter() != "")
         {
@@ -89,6 +103,32 @@ public class GridManager : MonoBehaviour
         typeOffset = 0;
 
         // TODO: VALIDATE WORD
+
+        // Check if first word has been placed
+        if (!firstWordPlaced)
+        {
+          // If not, then check if the word to be placed
+          // is in the center.
+          foreach (TileUnit t in wordTiles)
+          {
+            if (t.gridPoint == centerOfGrid)
+            {
+              Debug.Log("Yes");
+              firstWordPlaced = true;
+              break;
+            }
+          }
+
+          // If it is not in the center, reset the word.
+          if (!firstWordPlaced)
+          {
+            foreach (TileUnit t in wordTiles)
+            {
+              t.ChangeLetter("");
+            }
+            wordTiles.Clear();
+          }
+        }
         Debug.Log(currentWord);
         // TODO: SCORE WORD
         int score = 0;
@@ -96,11 +136,10 @@ public class GridManager : MonoBehaviour
         {
           score += t.pointValue;
           score = t.PointModifier(score);
-          t.ChangeColor(Color.red);
+          t.ChangeColor(Color.red); // TODO: Replace with player colors
           t.LockTyping();
         }
         Debug.Log(score);
-        wordTiles.Clear();
         currentWord = "";
       }
       else
@@ -112,6 +151,7 @@ public class GridManager : MonoBehaviour
         if (filteredInput != "")
         {
           // Loop is used to skip over characters to allow users to "add" to a word.
+          // Essentially just skips tiles with letters in them already.
           int xPos = (int)activeTile.x + typeOffset;
           while (xPos < width && tiles[xPos, (int)activeTile.y].GetLetter() != "")
           {
@@ -119,6 +159,8 @@ public class GridManager : MonoBehaviour
             typeOffset++;
             xPos = (int)activeTile.x + typeOffset;
           }
+
+          // Prevent from typing outside of grid.
           if (xPos < width)
           {
             string input = Input.inputString.Trim()[0].ToString();
@@ -130,10 +172,13 @@ public class GridManager : MonoBehaviour
         }
       }
     }
+
+    // ######################################## Vertical #########################################
     else if (isTypingVertical)
     {
       if (Input.GetKeyDown(KeyCode.Backspace))
       {
+        // Skip over locked tiles that already have letters
         if ((int)activeTile.y - typeOffset < minIndex) typeOffset--;
         int yPos = (int)activeTile.y - typeOffset;
         while (tiles[(int)activeTile.x, yPos].locked && yPos < minIndex)
@@ -141,16 +186,19 @@ public class GridManager : MonoBehaviour
           typeOffset--;
           yPos = (int)activeTile.y - typeOffset;
         }
+
+        // Only empty unlocked tiles
         if (!tiles[(int)activeTile.x, yPos].locked)
         {
           tiles[(int)activeTile.x, yPos].ChangeLetter("");
+          wordTiles.RemoveAt(wordTiles.Count - 1);
           currentWord = currentWord.Remove(currentWord.Length - 1, 1);
         }
       }
       else if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
       {
         isTypingVertical = false;
-        // Check if there is a letter afterwards.
+        // Check if there is a letter afterwards and if there are, add them to word as needed.
         int yPos = (int)activeTile.y - typeOffset;
         while (yPos > -1 && tiles[(int)activeTile.x, yPos].GetLetter() != "")
         {
@@ -161,6 +209,30 @@ public class GridManager : MonoBehaviour
         typeOffset = 0;
 
         // TODO: VALIDATE WORD
+        // Check if first word has been placed
+        if (!firstWordPlaced)
+        {
+          // If not, then check if the word to be placed
+          // is in the center.
+          foreach (TileUnit t in wordTiles)
+          {
+            if (t.gridPoint == centerOfGrid)
+            {
+              firstWordPlaced = true;
+              break;
+            }
+          }
+
+          // If it is not in the center, reset the word.
+          if (!firstWordPlaced)
+          {
+            foreach (TileUnit t in wordTiles)
+            {
+              t.ChangeLetter("");
+            }
+            wordTiles.Clear();
+          }
+        }
         Debug.Log(currentWord);
         // TODO: SCORE WORD
         int score = 0;
@@ -181,6 +253,7 @@ public class GridManager : MonoBehaviour
         string filteredInput = Regex.Replace(rawInput, "[^A-Za-z0-9]", "");
         if (filteredInput != "")
         {
+          // Skip over tiles with letters in them already
           int yPos = (int)activeTile.y - typeOffset;
           while (yPos > -1 && tiles[(int)activeTile.x, yPos].GetLetter() != "")
           {
@@ -188,6 +261,8 @@ public class GridManager : MonoBehaviour
             typeOffset++;
             yPos = (int)activeTile.y - typeOffset;
           }
+
+          // Prevent from typing outside of grid.
           if (yPos > -1)
           {
             string input = Input.inputString.Trim()[0].ToString();
@@ -258,6 +333,44 @@ public class GridManager : MonoBehaviour
       }
     }
 
+    return true;
+  }
+
+  // Description: Adds a full word to the center of the grid.
+  // Parameters:  word - The word to be inserted
+  //              horizontal - True for horizontal (L->R)
+  //                           False for vertical (Top->Down)
+  // Returns:     A bool saying whether or not the word could be written there.
+  //              Note that true represents that the word *was* written, not
+  //              attempted.
+  public bool AddWordToCenterGrid(string word, bool horizontal)
+  {
+    Vector2 startCell;
+    char[] letters = word.ToCharArray();
+    if (horizontal)
+    {
+      startCell = new Vector2(centerOfGrid.x - word.Length/2, centerOfGrid.y);
+      if (width - (int)startCell.x - (letters.Length - 1) < 0) return false;
+      int x = (int)startCell.x;
+      for (int i = 0; i < letters.Length; i++)
+      {
+        tiles[x, (int)startCell.y].ChangeLetter(letters[i].ToString());
+        x++;
+      }
+    }
+    else
+    {
+      startCell = new Vector2(centerOfGrid.x, centerOfGrid.y - word.Length / 2);
+      if ((int)startCell.y - (letters.Length - 1) < 0) return false;
+      int y = (int)startCell.y;
+      for (int i = 0; i < letters.Length; i++)
+      {
+        tiles[(int)startCell.x, y].ChangeLetter(letters[i].ToString());
+        y--;
+      }
+    }
+
+    if (firstWordPlaced == false) firstWordPlaced = true;
     return true;
   }
 }

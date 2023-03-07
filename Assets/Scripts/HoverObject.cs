@@ -2,11 +2,11 @@ using UnityEngine;
 
 public class HoverObject : MonoBehaviour
 {
-  [SerializeField] public HorizontalType horizontalButton;
-  [SerializeField] public VerticalType verticalButton;
-  public bool isActive { get; private set; }
-  public bool isTypingHorizontal { get; private set; }
-  public bool isTypingVertical { get; private set; }
+  [SerializeField] public HorizontalType horizontalButton;  // A placeholder to allow for code access to GameObject
+  [SerializeField] public VerticalType verticalButton;      // See above
+  public bool isActive { get; private set; }                // A flag to determine if the user is attempting to select a direction.
+  public bool isTypingHorizontal { get; private set; }      // A flag to determine direction selected
+  public bool isTypingVertical { get; private set; }        // See above
 
   // Description: Initializes a HoverObject to be
   //              invisible.

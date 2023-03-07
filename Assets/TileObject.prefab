@@ -452,7 +452,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -1236454607
-  m_SortingLayer: -1
+  m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -477,11 +477,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 68600a70806cf3541b780c6acfa58e11, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  baseColor: {r: 1, g: 1, b: 1, a: 0}
+  baseColor: {r: 0.331747, g: 0.24283554, b: 0.4811321, a: 0}
   renderer: {fileID: 3892950376268962177}
   tileText: {fileID: 1799938070350688285}
   pointText: {fileID: 274854090980196943}
-  pointValue: 0
   hoverObject: {fileID: 6306481310260447451, guid: ce48fd9c1784102468031a4bbabe3a16, type: 3}
   specialColor: {r: 0, g: 0, b: 0, a: 0}
   isSpecial: 0

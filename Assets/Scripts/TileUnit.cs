@@ -9,16 +9,16 @@ using UnityEngine.UI;
 
 public class TileUnit : MonoBehaviour
 {
-  [SerializeField] private Color baseColor;
-  [SerializeField] private new SpriteRenderer renderer;
-  [SerializeField] private TextMeshProUGUI tileText;
-  [SerializeField] private TextMeshProUGUI pointText;
-  [SerializeField] public int pointValue { get; private set; }
-  [SerializeField] private HoverObject hoverObject;
-  public Vector2 position { get; private set; }
-  public Vector2 gridPoint { get; private set; }
-  public System.Func<int, int> PointModifier { get; private set; }
-  public bool locked { get; private set; }
+  [SerializeField] private Color baseColor;                           // The default color for a tile.
+  [SerializeField] private new SpriteRenderer renderer;               // Placeholder to access GameObject's renderer
+  [SerializeField] private TextMeshProUGUI tileText;                  // Placeholder to access GameObject's letter mesh
+  [SerializeField] private TextMeshProUGUI pointText;                 // Placeholder to access GameObject's point mesh
+  [SerializeField] public int pointValue { get; private set; }        // The tile's point value
+  [SerializeField] private HoverObject hoverObject;                   // Placeholder to access GameObject's Hover mechanic
+  public Vector2 position { get; private set; }                       // World position
+  public Vector2 gridPoint { get; private set; }                      // Position in tile array (see GridManager)
+  public System.Func<int, int> PointModifier { get; private set; }    // Function to be called when scoring this tile if it is special
+  public bool locked { get; private set; }                            // Whether or not the tile can be accessed anymore.
 
 
   [SerializeField] private Color specialColor;
