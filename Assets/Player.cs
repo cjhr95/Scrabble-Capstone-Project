@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 
 namespace Assets
 {
@@ -7,7 +8,7 @@ namespace Assets
     Computer,
     Human
   }
-  public class Player
+  public class Player : MonoBehaviour
   {
     public const int MAX_HAND_SIZE = 7;         // The maximum number of tokens allowed
     public Token[] hand { get; private set; }   // The hand of tokens
@@ -15,7 +16,9 @@ namespace Assets
     public int turnTimeMS;                      // Turn time in milliseconds
     public PlayerType playerType {  get; private set; }
 
-    public Player(int turnTimeMS = 0, PlayerType playerType = default)
+    [SerializeField] private Token tokenPrefab;
+
+    public void Initialize(int turnTimeMS = 0, PlayerType playerType = default)
     {
       hand = new Token[MAX_HAND_SIZE];
       lastIndex = 0;
@@ -43,6 +46,23 @@ namespace Assets
         }
         // No new empty spots found
         if (oldIndex == lastIndex) lastIndex = MAX_HAND_SIZE;
+
+
+        // Move tokens respectively.
+        int xpos = 0;
+        for (int i = 0; i < hand.Length; i++)
+        {
+          if (hand[i] != null)
+          {
+            Vector3 bottomLeft = Camera.main.ScreenToWorldPoint(new Vector3(0, 0, 0));
+            float yVal = bottomLeft.y + hand[i].gameObject.GetComponent<SpriteRenderer>().size.y;
+            float xVal = bottomLeft.x + hand[i].gameObject.GetComponent<SpriteRenderer>().size.x + i;
+            hand[i].gameObject.transform.position = new Vector3(xVal, yVal, bottomLeft.z);
+          }
+          //if (hand[i] != null) hand[i].gameObject.transform.position = new Vector3(xpos, Y_DRAW_LEVEL);
+          xpos++;
+        }
+
         return true;
       }
       else return false;
@@ -92,7 +112,7 @@ namespace Assets
     //              will not remove it from the hand.
     public Token SelectRandomFromHand()
     {
-      Random r = new Random();
+      System.Random r = new System.Random();
       return hand[r.Next(hand.Length)];
     }
 
@@ -102,10 +122,19 @@ namespace Assets
     {
       if (lastIndex < MAX_HAND_SIZE)
       {
-        AddToHand(new Token(LetterPoolManager.RetrieveLetterFromPool()));
+        var createdToken = Instantiate(tokenPrefab);
+        createdToken.Initialize(LetterPoolManager.RetrieveLetterFromPool());
+        AddToHand(createdToken);
         return true;
       }
       else return false;
+    }
+
+    // Description: Draws cards until the hand can no longer accept
+    //              more.
+    public void DrawToMaxHand()
+    {
+      while (DrawAToken());
     }
 
     // Description: Finds and retrieves a token from the hand.
@@ -124,6 +153,7 @@ namespace Assets
         {
           lastIndex = i;
           tokenFromHand = hand[i];
+          Destroy(hand[i].gameObject);
           hand[i] = null;
           return true;
         }

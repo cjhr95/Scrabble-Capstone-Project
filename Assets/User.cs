@@ -11,9 +11,10 @@ namespace Assets
   {
     public static Player player { get; private set; }
 
-    public static void InitializeUser()
+    public static void InitializeUser(Player prefab)
     {
-      player = new Player();
+      player = UnityEngine.Object.Instantiate(prefab);
+      player.Initialize(playerType: PlayerType.Human);
     }
   }
 }

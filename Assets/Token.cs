@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TMPro;
+using UnityEngine;
 
 namespace Assets
 {
@@ -18,38 +20,50 @@ namespace Assets
     J, X = 8,
     Q, Z = 10
   }
-  public class Token
+  public class Token : MonoBehaviour
   {
     public int remainingTime { get; set; }              // The timer for the token
     public string tokenLetter { get; private set; }     // The letter the token represents
     public int pointValue { get; private set; }         // The value of the token
+    [SerializeField] private TextMeshProUGUI text;
     
     // Description: Creates a token with the given letter.
     //              Attempts to assign the token a value based
     //              on the letter values from the enum. If
     //              it fails, then the point value will be 0.
-    public Token(string letter) { 
+    public void Initialize(string letter)
+    {
       tokenLetter = letter.ToUpper();
+      text.text = letter;
 
       LetterValues letterVal;
       if (Enum.TryParse(tokenLetter, out letterVal))
       {
-        pointValue = (int) letterVal;
-      } else
+        pointValue = (int)letterVal;
+      }
+      else
       {
         pointValue = 0;
       }
     }
 
+    public void Update()
+    {
+      text.transform.position = gameObject.transform.position;
+    }
+
     public static bool operator ==(Token left, Token right)
     {
-      return left.tokenLetter == right.tokenLetter;
+      if (ReferenceEquals(left, null)) return ReferenceEquals(right, null);
+      else if (ReferenceEquals(right, null)) return false;
+      else return left.tokenLetter == right.tokenLetter;
     }
 
 
     public static bool operator !=(Token left, Token right)
     {
-      return left.tokenLetter != right.tokenLetter;
+
+      return !(left == right);
     }
 
     public override bool Equals(object obj)
