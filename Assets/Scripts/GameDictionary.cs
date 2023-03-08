@@ -15,9 +15,9 @@ namespace Game
     {
       if (words is null)
       {
+        words = new List<string>();
         using (StreamReader sr = new StreamReader(DictionaryPath))
         {
-          List<string> words = new List<string>();
           while (sr.Peek() >= 0) words.Add(sr.ReadLine());
         }
       }
@@ -29,7 +29,13 @@ namespace Game
     public static bool ValidateWord(string word)
     {
       if (word.Length < MinWordLength) return false;
-      return File.ReadAllText(DictionaryPath).Contains(word);
+      foreach (string w in words)
+      {
+        if (word == w) return true;
+      }
+      return false;
+
+      //return File.ReadAllText(DictionaryPath).Contains(word);
     }
 
     // Description: Finds a word of the given length from the

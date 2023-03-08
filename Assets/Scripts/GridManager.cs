@@ -63,6 +63,7 @@ public class GridManager : MonoBehaviour
   void Start()
   {
     GenerateGrid();
+    GameDictionary.InitializeDictionary();
 
     Camera.main.transform.position = new Vector3((float)width / 2, (float)height / 2, -10);
     Camera.main.orthographicSize = 9;
