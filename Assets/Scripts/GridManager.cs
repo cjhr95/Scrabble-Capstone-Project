@@ -1,8 +1,10 @@
 using Assets;
 using Game;
+using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using UnityEngine;
+using UnityEngine.SocialPlatforms.Impl;
 
 public class GridManager : MonoBehaviour
 {
@@ -22,6 +24,7 @@ public class GridManager : MonoBehaviour
   private string currentWord;                           // The current "working" word user is typing.
   private Stack<TileUnit> wordTiles;                     // The tiles that the player has written on. This is *in order*
   private Stack<Token> tokensUsed;
+  private int playerScore;
   
   // Description: Generates a grid based on the width
   //              and height fields. Also fills out
@@ -31,6 +34,7 @@ public class GridManager : MonoBehaviour
     tiles = new TileUnit[width, height];
     wordTiles = new Stack<TileUnit>();
     tokensUsed = new Stack<Token>();
+    playerScore = 0;
     isTypingHorizontal = false;
     isTypingVertical = false;
     firstWordPlaced = false;
@@ -89,6 +93,17 @@ public class GridManager : MonoBehaviour
         // Only empty unlocked tiles.
         if (!tiles[xPos, (int)activeTile.y].locked)
         {
+          // Remove playerScore if it was added
+          if (playerScore > 0)
+          {
+            LetterValues letterVal;
+            if (Enum.TryParse(tiles[xPos, (int)activeTile.y].GetLetter().ToUpper(), out letterVal))
+            {
+              playerScore -= (int)letterVal;
+            }
+          }
+
+          // Reset tile
           tiles[xPos, (int)activeTile.y].ChangeLetter("");
           wordTiles.Pop();
           User.player.AddToHand(tokensUsed.Pop());
@@ -104,6 +119,11 @@ public class GridManager : MonoBehaviour
         while (xPos < width && tiles[xPos, (int)activeTile.y].GetLetter() != "")
         {
           currentWord += tiles[xPos, (int)activeTile.y].GetLetter();
+          LetterValues letterVal;
+          if (Enum.TryParse(tiles[xPos, (int)activeTile.y].GetLetter().ToUpper(), out letterVal))
+          {
+            playerScore += (int)letterVal;
+          }
           typeOffset++;
           xPos = (int)activeTile.x + typeOffset;
         }
@@ -140,23 +160,22 @@ public class GridManager : MonoBehaviour
         }
         Debug.Log(currentWord);
         // TODO: SCORE WORD
-        int score = 0;
         while (tokensUsed.Count > 0)
         {
           Token t = tokensUsed.Pop();
-          score += t.pointValue;
+          playerScore += t.pointValue;
           Destroy(t.gameObject);
         }
         while (wordTiles.Count > 0)
         {
           TileUnit t = wordTiles.Pop();
-          score += t.pointValue;
-          score = t.PointModifier(score);
+          playerScore += t.pointValue;
+          playerScore = t.PointModifier(playerScore);
           t.ChangeColor(Color.red);
           t.LockTyping();
         }
         User.player.DrawToMaxHand();
-        Debug.Log(score);
+        Debug.Log(playerScore);
         currentWord = "";
       }
       else
@@ -174,6 +193,11 @@ public class GridManager : MonoBehaviour
           while (xPos < width && tiles[xPos, (int)activeTile.y].GetLetter() != "")
           {
             currentWord += tiles[xPos, (int)activeTile.y].GetLetter();
+            LetterValues letterVal;
+            if (Enum.TryParse(tiles[xPos, (int)activeTile.y].GetLetter().ToUpper(), out letterVal))
+            {
+              playerScore += (int)letterVal;
+            }
             typeOffset++;
             xPos = (int)activeTile.x + typeOffset;
           }
@@ -208,6 +232,17 @@ public class GridManager : MonoBehaviour
         // Only empty unlocked tiles
         if (!tiles[(int)activeTile.x, yPos].locked)
         {
+          // Remove score if it was added
+          if (playerScore > 0)
+          {
+            LetterValues letterVal;
+            if (Enum.TryParse(tiles[(int)activeTile.x, yPos].GetLetter().ToUpper(), out letterVal))
+            {
+              playerScore -= (int)letterVal;
+            }
+          }
+
+          // Reset tile
           tiles[(int)activeTile.x, yPos].ChangeLetter("");
           wordTiles.Pop();
           User.player.AddToHand(tokensUsed.Pop());
@@ -222,6 +257,11 @@ public class GridManager : MonoBehaviour
         while (yPos > -1 && tiles[(int)activeTile.x, yPos].GetLetter() != "")
         {
           currentWord += tiles[(int)activeTile.x, yPos].GetLetter();
+          LetterValues letterVal;
+          if (Enum.TryParse(tiles[(int)activeTile.x, yPos].GetLetter().ToUpper(), out letterVal))
+          {
+            playerScore += (int)letterVal;
+          }
           typeOffset++;
           yPos = (int)activeTile.y - typeOffset;
         }
@@ -260,22 +300,21 @@ public class GridManager : MonoBehaviour
         }
         Debug.Log(currentWord);
         // TODO: SCORE WORD
-        int score = 0;
         while (tokensUsed.Count > 0)
         {
           Token t = tokensUsed.Pop();
-          score += t.pointValue;
+          playerScore += t.pointValue;
           Destroy(t.gameObject);
         }
         while (wordTiles.Count > 0)
         {
           TileUnit t = wordTiles.Pop();
-          score += t.pointValue;
-          score = t.PointModifier(score);
+          playerScore += t.pointValue;
+          playerScore = t.PointModifier(playerScore);
           t.ChangeColor(Color.red);
           t.LockTyping();
         }
-        Debug.Log(score);
+        Debug.Log(playerScore);
         User.player.DrawToMaxHand();
         currentWord = "";
       }
@@ -291,6 +330,11 @@ public class GridManager : MonoBehaviour
           while (yPos > -1 && tiles[(int)activeTile.x, yPos].GetLetter() != "")
           {
             currentWord += tiles[(int)activeTile.x, yPos].GetLetter();
+            LetterValues letterVal;
+            if (Enum.TryParse(tiles[(int)activeTile.x, yPos].GetLetter().ToUpper(), out letterVal))
+            {
+              playerScore += (int)letterVal;
+            }
             typeOffset++;
             yPos = (int)activeTile.y - typeOffset;
           }
@@ -329,7 +373,7 @@ public class GridManager : MonoBehaviour
       minIndex = (int)startTile.gridPoint.y;
     }
     activeTile = startTile.gridPoint;
-    
+    playerScore = 0;
   }
 
 
