@@ -38,15 +38,15 @@ namespace Assets
         {
             float probability = rand_mod.NextDouble();
             if(probability > 0.4)                                      // 60% chance for common letter (A, E, I, O, N, R, T, L, S, U)
-                new_letter.tokenLetter = rand_mod.Next(common_letters.Count)
+                new_letter.tokenLetter = common_letters[rand_mod.Next(0, common_letters.Length)];
             else if((probability > 0.1) && (probability <= 0.4))       // 30% chance for uncommon letter (D, B, G, C, M, P, F, H, W, Y)
-                new_letter.tokenLetter = rand_mod.Next(uncommon_letters.Count)
+                new_letter.tokenLetter = uncommon_letters[rand_mod.Next(0, common_letters.Length)];
             else                                                       // 10% chance for rare letter (V, K, J, X, Q, Z)
-                new_letter.tokenLetter = rand_mod.Next(rare_letters.Count)
+                new_letter.tokenLetter = rare_letters[rand_mod.Next(0, common_letters.Length)];
         }
 
         // Description: Replaces a token in a player's hand
-        public void activate(Player player, Token letterToReplace)
+        public void activate(ref Player player, Token letterToReplace)
         {
             if (player.hand.Length != MAX_HAND_SIZE)
                 player.AddToHand(new_letter);
@@ -118,7 +118,7 @@ namespace Assets
         }
 
         // Description: Swaps a random letter from the passed player's hand
-        public void activate(Player player)
+        public void activate(ref Player player)
         {
             if(player.hand.Length != MAX_HAND_SIZE)
                 player.AddToHand(swapToken);
@@ -140,7 +140,7 @@ namespace Assets
         storeWeight = 0.1;                                      // 10% chance to appear in the store
         
         // Description: Adds the timeAdded variable to a player's turn time
-        public void activate(Player player)
+        public void activate(ref Player player)
         {
             player.turnTimeMS = player.turnTimeMS + timeAdded;
         }
