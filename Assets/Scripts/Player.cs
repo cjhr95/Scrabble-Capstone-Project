@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Assets
@@ -49,23 +50,28 @@ namespace Assets
 
 
         // Move tokens respectively.
-        int xpos = 0;
-        for (int i = 0; i < hand.Length; i++)
-        {
-          if (hand[i] != null)
-          {
-            Vector3 bottomLeft = Camera.main.ScreenToWorldPoint(new Vector3(0, 0, 0));
-            float yVal = bottomLeft.y + hand[i].gameObject.GetComponent<SpriteRenderer>().size.y;
-            float xVal = bottomLeft.x + hand[i].gameObject.GetComponent<SpriteRenderer>().size.x + i;
-            hand[i].gameObject.transform.position = new Vector3(xVal, yVal, bottomLeft.z);
-          }
-          //if (hand[i] != null) hand[i].gameObject.transform.position = new Vector3(xpos, Y_DRAW_LEVEL);
-          xpos++;
-        }
+        RepositionTokens();
 
+        t.gameObject.SetActive(true);
         return true;
       }
       else return false;
+    }
+
+    public void RepositionTokens()
+    {
+      int xpos = 0;
+      for (int i = 0; i < hand.Length; i++)
+      {
+        if (hand[i] != null)
+        {
+          Vector3 bottomLeft = Camera.main.ScreenToWorldPoint(new Vector3(0, 0));
+          float yVal = bottomLeft.y + hand[i].gameObject.GetComponent<SpriteRenderer>().size.y;
+          float xVal = bottomLeft.x + hand[i].gameObject.GetComponent<SpriteRenderer>().size.x + xpos;
+          hand[i].gameObject.transform.position = new Vector3(xVal, yVal, 0);
+          xpos++;
+        }
+      }
     }
 
 
@@ -102,10 +108,21 @@ namespace Assets
     {
       foreach (Token token in hand)
       {
-        if (token.tokenLetter == letter) return token;
+        if (token is not null &&  token.tokenLetter == letter) return token;
       }
 
       return null;
+    }
+
+    public List<string> GetAvailableLetters()
+    {
+      List<string> list = new List<string>();
+      for (int i = 0; i < hand.Length; i++)
+      {
+        if (hand[i].tokenLetter != "") list.Add(hand[i].tokenLetter);
+      }
+
+      return list;
     }
 
     // Description: Returns a random token from the hand. This
@@ -153,8 +170,9 @@ namespace Assets
         {
           lastIndex = i;
           tokenFromHand = hand[i];
-          Destroy(hand[i].gameObject);
+          tokenFromHand.gameObject.SetActive(false);
           hand[i] = null;
+          RepositionTokens();
           return true;
         }
       }
