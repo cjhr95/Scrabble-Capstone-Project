@@ -1,41 +1,21 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using UnityEngine.UIElements;
 
 namespace Game
 {
   public static class GameDictionary
   {
     const string DictionaryPath = "./Assets/ScrabbleDictionary.txt";
-    public const int MinWordLength = 3;
-    private static List<string> words;
-
-    public static void InitializeDictionary()
-    {
-      if (words is null)
-      {
-        words = new List<string>();
-        using (StreamReader sr = new StreamReader(DictionaryPath))
-        {
-          while (sr.Peek() >= 0) words.Add(sr.ReadLine());
-        }
-      }
-    }
+    public const int MinWordLength = 2;
 
     // Description: Checks the word against the dictionary.
     // Parameters:  word - The word to be checked.
     // Returns:     true if the word exists, false otherwise.
     public static bool ValidateWord(string word)
     {
-      if (word.Length < MinWordLength) return false;
-      foreach (string w in words)
-      {
-        if (word == w) return true;
-      }
-      return false;
-
-      //return File.ReadAllText(DictionaryPath).Contains(word);
+      if (word.Length < 2) return false;
+      return File.ReadAllText(DictionaryPath).Contains(word);
     }
 
     // Description: Finds a word of the given length from the
