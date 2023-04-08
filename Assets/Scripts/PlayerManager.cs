@@ -1,11 +1,14 @@
 using Assets;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class PlayerManager : MonoBehaviour
 {
   [SerializeField] private Player playerPrefab;
+  [SerializeField] private TextMeshProUGUI userScore;
+  [SerializeField] private TextMeshProUGUI computerScore;
   // Start is called before the first frame update
   void Start()
   {
@@ -21,5 +24,16 @@ public class PlayerManager : MonoBehaviour
   void Update()
   {
         
+  }
+
+  public void updateUserScore(int score)
+  {
+    User.player.SetScore(score);
+    userScore.text = "Score: " + score.ToString();
+  }
+
+  public void UpdateComputerScore(int score)
+  {
+    computerScore.text = "Computer Score: " + score.ToString();
   }
 }

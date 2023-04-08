@@ -1,6 +1,7 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
+using UnityEngine.SocialPlatforms.Impl;
 
 namespace Assets
 {
@@ -15,9 +16,8 @@ namespace Assets
     public Token[] hand { get; private set; }   // The hand of tokens
     private int lastIndex;                      // Index to store where next empty slot is
     public int turnTimeMS;                      // Turn time in milliseconds
+    public int score { get; private set; }
     public PlayerType playerType {  get; private set; }
-    public Text scoreText;
-    public int score = 0;
 
     [SerializeField] private Token tokenPrefab;
 
@@ -25,9 +25,12 @@ namespace Assets
     {
       hand = new Token[MAX_HAND_SIZE];
       lastIndex = 0;
+      score = 0;
       this.turnTimeMS = turnTimeMS;
       this.playerType = playerType;
     }
+
+    public void SetScore(int amt) { score = amt; }
 
     // Description: Adds a token to the hand.
     //              Ignores token if the hand is full.
@@ -52,23 +55,28 @@ namespace Assets
 
 
         // Move tokens respectively.
-        int xpos = 0;
-        for (int i = 0; i < hand.Length; i++)
-        {
-          if (hand[i] != null)
-          {
-            Vector3 bottomLeft = Camera.main.ScreenToWorldPoint(new Vector3(0, 0, 0));
-            float yVal = bottomLeft.y + hand[i].gameObject.GetComponent<SpriteRenderer>().size.y;
-            float xVal = bottomLeft.x + hand[i].gameObject.GetComponent<SpriteRenderer>().size.x + i;
-            hand[i].gameObject.transform.position = new Vector3(xVal + 2 , yVal + 4, 0);
-          }
-          //if (hand[i] != null) hand[i].gameObject.transform.position = new Vector3(xpos, Y_DRAW_LEVEL);
-          xpos++;
-        }
+        RepositionTokens();
 
+        t.gameObject.SetActive(true);
         return true;
       }
       else return false;
+    }
+
+    public void RepositionTokens()
+    {
+      int xpos = 0;
+      for (int i = 0; i < hand.Length; i++)
+      {
+        if (hand[i] != null)
+        {
+          Vector3 bottomLeft = Camera.main.ScreenToWorldPoint(new Vector3(0, 0));
+          float yVal = bottomLeft.y + hand[i].gameObject.GetComponent<SpriteRenderer>().size.y;
+          float xVal = bottomLeft.x + hand[i].gameObject.GetComponent<SpriteRenderer>().size.x + xpos;
+          hand[i].gameObject.transform.position = new Vector3(xVal, yVal, 0);
+          xpos++;
+        }
+      }
     }
 
 
@@ -105,10 +113,21 @@ namespace Assets
     {
       foreach (Token token in hand)
       {
-        if (token.tokenLetter == letter) return token;
+        if (token is not null &&  token.tokenLetter == letter) return token;
       }
 
       return null;
+    }
+
+    public List<string> GetAvailableLetters()
+    {
+      List<string> list = new List<string>();
+      for (int i = 0; i < hand.Length; i++)
+      {
+        if (hand[i].tokenLetter != "") list.Add(hand[i].tokenLetter);
+      }
+
+      return list;
     }
 
     // Description: Returns a random token from the hand. This
@@ -156,25 +175,14 @@ namespace Assets
         {
           lastIndex = i;
           tokenFromHand = hand[i];
-          Destroy(hand[i].gameObject);
+          tokenFromHand.gameObject.SetActive(false);
           hand[i] = null;
+          RepositionTokens();
           return true;
         }
       }
 
       return false;
     }
-
-    void Start()
-    {
-      scoreText = GameObject.Find("Player Score Text (TMP)").GetComponent<Text>();
-
-    }
-
-    void Update()
-    {
-      scoreText.text = "Score: " + score.ToString();
-    }
-
   }
 }

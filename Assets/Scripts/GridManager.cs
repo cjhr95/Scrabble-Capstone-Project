@@ -1,6 +1,10 @@
+using Assets;
+using Game;
+using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using UnityEngine;
+using UnityEngine.SocialPlatforms.Impl;
 
 public class GridManager : MonoBehaviour
 {
@@ -18,7 +22,11 @@ public class GridManager : MonoBehaviour
   public bool isTypingVertical { get; private set; }    // See above
   private int typeOffset;                               // The offset from originiating tile.
   private string currentWord;                           // The current "working" word user is typing.
-  private List<TileUnit> wordTiles;                     // The tiles that the player has written on. This is *in order*
+  private Stack<TileUnit> wordTiles;                    // The tiles that the player has written on. This is *in order*
+  private Stack<Token> tokensUsed;
+  private int runningScore;
+
+  PlayerManager playerManager;
   
   // Description: Generates a grid based on the width
   //              and height fields. Also fills out
@@ -26,12 +34,14 @@ public class GridManager : MonoBehaviour
   void GenerateGrid()
   {
     tiles = new TileUnit[width, height];
-    wordTiles = new List<TileUnit>();
+    wordTiles = new Stack<TileUnit>();
+    tokensUsed = new Stack<Token>();
     isTypingHorizontal = false;
     isTypingVertical = false;
     firstWordPlaced = false;
     centerOfGrid = new Vector2(width / 2, height / 2);
     typeOffset = 0;
+    playerManager = FindObjectOfType<PlayerManager>();
     for (int x = 0; x < width; x++)
     {
       for (int y = 0; y < height; y++)
@@ -40,13 +50,13 @@ public class GridManager : MonoBehaviour
         createdTile.transform.position = new Vector3(x, y);
         createdTile.name = $"Tile ({x},{y})";
         tiles[x,y] = createdTile;
-        
 
 
         // TODO: Add logic to determine if tile is special.
-        createdTile.Initialize(new Vector2(x, y), new Vector2(x, y));
-        if (createdTile.gridPoint == centerOfGrid)
-          createdTile.ChangeColor(Color.gray);
+        if (new Vector2(x,y) == centerOfGrid)
+        {
+          createdTile.Initialize(new Vector2(x, y), new Vector2(x, y), color: Color.gray, pointVal: 100, specialModifierFunc: val => (int) (val * 1.25));
+        } else createdTile.Initialize(new Vector2(x, y), new Vector2(x, y));
       }
     }
   }
@@ -55,9 +65,11 @@ public class GridManager : MonoBehaviour
   void Start()
   {
     GenerateGrid();
+    GameDictionary.InitializeDictionary();
 
-    Camera.main.transform.position = new Vector3((float)width / 2, height / 2, -10);
-    Camera.main.orthographicSize = (float)7.7;
+    Camera.main.transform.position = new Vector3((float)width / 2, (float)height / 2, -10);
+    Camera.main.orthographicSize = 9;
+    User.player.RepositionTokens();
   }
 
   // Description: Called once per frame.
@@ -84,8 +96,20 @@ public class GridManager : MonoBehaviour
         // Only empty unlocked tiles.
         if (!tiles[xPos, (int)activeTile.y].locked)
         {
+          // Remove runningScore if it was added
+          if (runningScore > 0)
+          {
+            LetterValues letterVal;
+            if (Enum.TryParse(tiles[xPos, (int)activeTile.y].GetLetter().ToUpper(), out letterVal))
+            {
+              runningScore -= (int)letterVal;
+            }
+          }
+
+          // Reset tile
           tiles[xPos, (int)activeTile.y].ChangeLetter("");
-          wordTiles.RemoveAt(wordTiles.Count - 1);
+          wordTiles.Pop();
+          User.player.AddToHand(tokensUsed.Pop());
           currentWord = currentWord.Remove(currentWord.Length - 1, 1);
         }
       }
@@ -98,12 +122,23 @@ public class GridManager : MonoBehaviour
         while (xPos < width && tiles[xPos, (int)activeTile.y].GetLetter() != "")
         {
           currentWord += tiles[xPos, (int)activeTile.y].GetLetter();
+          LetterValues letterVal;
+          if (Enum.TryParse(tiles[xPos, (int)activeTile.y].GetLetter().ToUpper(), out letterVal))
+          {
+            runningScore += (int)letterVal;
+          }
           typeOffset++;
           xPos = (int)activeTile.x + typeOffset;
         }
         typeOffset = 0;
 
         // TODO: VALIDATE WORD
+
+        if (!GameDictionary.ValidateWord(currentWord))
+        {
+          while (wordTiles.Count > 0) wordTiles.Pop().ChangeLetter("");
+          while (tokensUsed.Count > 0) User.player.AddToHand(tokensUsed.Pop());
+        }
 
         // Check if first word has been placed
         if (!firstWordPlaced)
@@ -114,7 +149,6 @@ public class GridManager : MonoBehaviour
           {
             if (t.gridPoint == centerOfGrid)
             {
-              Debug.Log("Yes");
               firstWordPlaced = true;
               break;
             }
@@ -123,24 +157,27 @@ public class GridManager : MonoBehaviour
           // If it is not in the center, reset the word.
           if (!firstWordPlaced)
           {
-            foreach (TileUnit t in wordTiles)
-            {
-              t.ChangeLetter("");
-            }
-            wordTiles.Clear();
+            while (wordTiles.Count > 0) wordTiles.Pop().ChangeLetter("");
+            while (tokensUsed.Count > 0) User.player.AddToHand(tokensUsed.Pop());
           }
         }
-        Debug.Log(currentWord);
         // TODO: SCORE WORD
-        int score = 0;
-        foreach (TileUnit t in wordTiles)
+        while (tokensUsed.Count > 0)
         {
-          score += t.pointValue;
-          score = t.PointModifier(score);
-          t.ChangeColor(Color.red); // TODO: Replace with player colors
+          Token t = tokensUsed.Pop();
+          runningScore += t.pointValue;
+          Destroy(t.gameObject);
+        }
+        while (wordTiles.Count > 0)
+        {
+          TileUnit t = wordTiles.Pop();
+          runningScore += t.pointValue;
+          runningScore = t.PointModifier(runningScore);
+          t.ChangeColor(Color.red);
           t.LockTyping();
         }
-        Debug.Log(score);
+        User.player.DrawToMaxHand();
+        playerManager.updateUserScore(User.player.score + runningScore);
         currentWord = "";
       }
       else
@@ -148,8 +185,9 @@ public class GridManager : MonoBehaviour
         // Input needs to be filtered out before used. Unity/C# will read ALL
         // input, including ones that don't produce a legible character.
         string rawInput = Input.inputString;
-        string filteredInput = Regex.Replace(rawInput, "[^A-Za-z]", "");
-        if (filteredInput != "")
+        string filteredInput = Regex.Replace(rawInput, "[^A-Za-z]", "").ToUpper();
+        Token tokenFromHand;
+        if (filteredInput != "" && User.player.RetrieveToken(User.player.GetTokenFromLetter(filteredInput), out tokenFromHand))
         {
           // Loop is used to skip over characters to allow users to "add" to a word.
           // Essentially just skips tiles with letters in them already.
@@ -157,6 +195,11 @@ public class GridManager : MonoBehaviour
           while (xPos < width && tiles[xPos, (int)activeTile.y].GetLetter() != "")
           {
             currentWord += tiles[xPos, (int)activeTile.y].GetLetter();
+            LetterValues letterVal;
+            if (Enum.TryParse(tiles[xPos, (int)activeTile.y].GetLetter().ToUpper(), out letterVal))
+            {
+              runningScore += (int)letterVal;
+            }
             typeOffset++;
             xPos = (int)activeTile.x + typeOffset;
           }
@@ -164,10 +207,10 @@ public class GridManager : MonoBehaviour
           // Prevent from typing outside of grid.
           if (xPos < width)
           {
-            string input = Input.inputString.Trim()[0].ToString();
-            tiles[xPos, (int)activeTile.y].ChangeLetter(input);
-            wordTiles.Add(tiles[xPos, (int)activeTile.y]);
-            currentWord += input;
+            tiles[xPos, (int)activeTile.y].ChangeLetter(filteredInput);
+            wordTiles.Push(tiles[xPos, (int)activeTile.y]);
+            tokensUsed.Push(tokenFromHand);
+            currentWord += filteredInput;
             typeOffset++;
           }
         }
@@ -191,8 +234,20 @@ public class GridManager : MonoBehaviour
         // Only empty unlocked tiles
         if (!tiles[(int)activeTile.x, yPos].locked)
         {
+          // Remove score if it was added
+          if (runningScore > 0)
+          {
+            LetterValues letterVal;
+            if (Enum.TryParse(tiles[(int)activeTile.x, yPos].GetLetter().ToUpper(), out letterVal))
+            {
+              runningScore -= (int)letterVal;
+            }
+          }
+
+          // Reset tile
           tiles[(int)activeTile.x, yPos].ChangeLetter("");
-          wordTiles.RemoveAt(wordTiles.Count - 1);
+          wordTiles.Pop();
+          User.player.AddToHand(tokensUsed.Pop());
           currentWord = currentWord.Remove(currentWord.Length - 1, 1);
         }
       }
@@ -204,12 +259,22 @@ public class GridManager : MonoBehaviour
         while (yPos > -1 && tiles[(int)activeTile.x, yPos].GetLetter() != "")
         {
           currentWord += tiles[(int)activeTile.x, yPos].GetLetter();
+          LetterValues letterVal;
+          if (Enum.TryParse(tiles[(int)activeTile.x, yPos].GetLetter().ToUpper(), out letterVal))
+          {
+            runningScore += (int)letterVal;
+          }
           typeOffset++;
           yPos = (int)activeTile.y - typeOffset;
         }
         typeOffset = 0;
 
         // TODO: VALIDATE WORD
+        if (!GameDictionary.ValidateWord(currentWord))
+        {
+          while (wordTiles.Count > 0) wordTiles.Pop().ChangeLetter("");
+          while (tokensUsed.Count > 0) User.player.AddToHand(tokensUsed.Pop());
+        }
         // Check if first word has been placed
         if (!firstWordPlaced)
         {
@@ -231,34 +296,46 @@ public class GridManager : MonoBehaviour
             {
               t.ChangeLetter("");
             }
+            while (tokensUsed.Count > 0) User.player.AddToHand(tokensUsed.Pop());
             wordTiles.Clear();
           }
         }
-        Debug.Log(currentWord);
         // TODO: SCORE WORD
-        int score = 0;
-        foreach (TileUnit t in wordTiles)
+        while (tokensUsed.Count > 0)
         {
-          score += t.pointValue;
-          score = t.PointModifier(score);
+          Token t = tokensUsed.Pop();
+          runningScore += t.pointValue;
+          Destroy(t.gameObject);
+        }
+        while (wordTiles.Count > 0)
+        {
+          TileUnit t = wordTiles.Pop();
+          runningScore += t.pointValue;
+          runningScore = t.PointModifier(runningScore);
           t.ChangeColor(Color.red);
           t.LockTyping();
         }
-        Debug.Log(score);
-        wordTiles.Clear();
+        User.player.DrawToMaxHand();
+        playerManager.updateUserScore(User.player.score + runningScore);
         currentWord = "";
       }
       else
       {
         string rawInput = Input.inputString;
-        string filteredInput = Regex.Replace(rawInput, "[^A-Za-z0-9]", "");
-        if (filteredInput != "")
+        string filteredInput = Regex.Replace(rawInput, "[^A-Za-z0-9]", "").ToUpper();
+        Token tokenFromHand;
+        if (filteredInput != "" && User.player.RetrieveToken(User.player.GetTokenFromLetter(filteredInput), out tokenFromHand))
         {
           // Skip over tiles with letters in them already
           int yPos = (int)activeTile.y - typeOffset;
           while (yPos > -1 && tiles[(int)activeTile.x, yPos].GetLetter() != "")
           {
             currentWord += tiles[(int)activeTile.x, yPos].GetLetter();
+            LetterValues letterVal;
+            if (Enum.TryParse(tiles[(int)activeTile.x, yPos].GetLetter().ToUpper(), out letterVal))
+            {
+              runningScore += (int)letterVal;
+            }
             typeOffset++;
             yPos = (int)activeTile.y - typeOffset;
           }
@@ -266,10 +343,10 @@ public class GridManager : MonoBehaviour
           // Prevent from typing outside of grid.
           if (yPos > -1)
           {
-            string input = Input.inputString.Trim()[0].ToString();
-            tiles[(int)activeTile.x, yPos].ChangeLetter(input);
-            wordTiles.Add(tiles[(int)activeTile.x, yPos]);
-            currentWord += input;
+            tiles[(int)activeTile.x, yPos].ChangeLetter(filteredInput);
+            wordTiles.Push(tiles[(int)activeTile.x, yPos]);
+            tokensUsed.Push(tokenFromHand);
+            currentWord += filteredInput;
             typeOffset++;
           }
         }
@@ -297,7 +374,7 @@ public class GridManager : MonoBehaviour
       minIndex = (int)startTile.gridPoint.y;
     }
     activeTile = startTile.gridPoint;
-    
+    runningScore = 0;
   }
 
 

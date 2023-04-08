@@ -12,13 +12,26 @@ namespace Assets
   // Letter values may need to be reworked during playtesting.
   public enum LetterValues
   {
-    A, E, I, O, U, L, N, S, T, R = 1,
-    D, G = 2,
-    B, C, M, P = 3, 
-    F, H, V, W, Y = 4,
+    // 1 point
+    A = 1, E = 1, I = 1, O = 1, U = 1, L = 1, N = 1, S = 1, T = 1, R = 1,
+
+    // 2 points
+    D = 2, G = 2,
+
+    // 3 points
+    B = 3, C = 3, M = 3, P = 3, 
+
+    // 4 points
+    F = 4, H = 4, V = 4, W = 4, Y = 4,
+
+    // 5 points
     K = 5,
-    J, X = 8,
-    Q, Z = 10
+
+    // 8 points
+    J = 8, X = 8,
+
+    // 10 points
+    Q = 10, Z = 10
   }
   public class Token : MonoBehaviour
   {
@@ -41,10 +54,7 @@ namespace Assets
       {
         pointValue = (int)letterVal;
       }
-      else
-      {
-        pointValue = 0;
-      }
+      else pointValue = 0;
     }
 
     public void Update()
