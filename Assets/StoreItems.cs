@@ -11,16 +11,18 @@ namespace Assets
 {
     public class StoreItem : MonoBehaviour
     {
-        public int cost = 15 { get; set; }      // I don't know what to set for cost values yet
+        public int cost { get; set; }      // I don't know what to set for cost values yet
         public float storeWeight { get; set; }
         Random rand_mod = new Random();
         private char[] common_letters = {'A', 'E', 'I', 'O', 'N', 'R', 'T', 'L', 'S', 'U'};
         private char[] uncommon_letters = {'D', 'B', 'G', 'C', 'M', 'P', 'F', 'H', 'W', 'Y'};
         private char[] rare_letters = {'V', 'K', 'J', 'X', 'Q', 'Z'};
+        [SerializeField] private TextMeshProUGUI text;
 
-        public void Initialize();
-        public void Update();
-
+        public void Update()
+        {
+            text.transform.position = gameObject.transform.position;
+        }
     }
 
     public class Letter : StoreItem
@@ -34,7 +36,7 @@ namespace Assets
 
         // Description: Constructor for the Letter StoreItem. Randomly selects the letter
         //              based on rarity
-        public Letter()
+        public void Initialize()
         {
             float probability = rand_mod.NextDouble();
             if(probability > 0.4)                                      // 60% chance for common letter (A, E, I, O, N, R, T, L, S, U)
@@ -64,13 +66,13 @@ namespace Assets
         Store item to multiply a score - random for a buff (2x) or debuff (0.5x)
         If bought, the multiplier variable is used to affect the word score
         */
-        private bool status;     // Flag to determine if this item is a debuff or a buff; default is buff
+        private bool status;            // Flag to determine if this item is a debuff or a buff; default is buff
         private float multiplier;
         storeWeight = 0.1;              // 10% chance to appear in the store 
         
         // Description: Constructor for the Multiplier StoreItem. Randomly determines
         //              if the object will be a buff or debuff
-        public Multiplier()
+        public void Initialize()
         {
             status = true;
             multiplier = 0;
@@ -96,7 +98,7 @@ namespace Assets
             }
             else
             {
-                // Debuf status; apply 0.5x bonus to opponent's netx play
+                // Debuf status; apply 0.5x bonus to opponent's next play
             }
             return;
         }
@@ -112,7 +114,7 @@ namespace Assets
 
         // Description: Constructor for LetterSwapper debuff item. Randomly chooses
         //              a rare letter and swaps it from the opponet's hand
-        public LetterSwapper()
+        public void Initialize()
         {
            swapToken.tokenLetter = rare_letters[rand_mod.Next(0,rare_letters.Length)]  // Select random letter from rare pool 
         }
@@ -144,15 +146,5 @@ namespace Assets
         {
             player.turnTimeMS = player.turnTimeMS + timeAdded;
         }
-    }
-
-    public class WordStealer : StoreItem
-    {
-        /*
-        Store item to steal an opponent's word score
-        */
-        storeWeight = 0.1;             // 5% chance to appear in the store
-
-        // TODO: implement when we determine how word scores are calculated
     }
 }

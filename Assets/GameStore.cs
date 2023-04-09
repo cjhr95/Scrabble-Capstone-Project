@@ -21,7 +21,7 @@ namespace Assets
             private float probability;
             for(int i = 0; i < MAX_STORE_SIZE; i++)
             {
-                probability = rnd.NextDouble()
+                probability = rnd.NextDouble();
                 if(probability > Letter.storeWeight)    // Generated value is greater than 0.5
                     storeStock.Add(new Letter());
                 else if((probability <= Letter.storeWeight) && (probability > LetterSwapper.storeWeight))   // Generated value is 0.5 >= x > 0.25
@@ -29,7 +29,7 @@ namespace Assets
                 else if((probability <= LetterSwapper.storeWeight) && (probability > TimeIncrease.storeWeight)) // Generated value is 0.25 >= x > 0.1
                 {
                     //
-                    probability = rnd.NextDouble()
+                    probability = rnd.NextDouble();
                     if(probability >= 0.5)
                         storeStock.Add(new WordStealer());
                     else
