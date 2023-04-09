@@ -3043,9 +3043,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1874736770}
+      - m_Target: {fileID: 1874736769}
         m_TargetAssemblyTypeName: SlimUI.ModernMenu.MainMenuNew, GameAssembly
-        m_MethodName: PlayCampaign
+        m_MethodName: 
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

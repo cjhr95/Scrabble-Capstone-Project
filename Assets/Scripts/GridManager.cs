@@ -1,6 +1,7 @@
 using Assets;
 using Game;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using UnityEngine;
@@ -75,283 +76,260 @@ public class GridManager : MonoBehaviour
   // Description: Called once per frame.
   void Update()
   {
-
-    // ####################################### Typing Logic #######################################
-    // ######################################## Horzontal #########################################
-    if (isTypingHorizontal)
+    if (!playerManager.GameOver)
     {
-      // Code will check if enter/backspace is pressed. If not,
-      // then it checks what the user is typing in.
-      if (Input.GetKeyDown(KeyCode.Backspace))
+      if (playerManager.IsHumanPlayer())
       {
-        // Skip over locked tiles that already have letters
-        if ((int)activeTile.x + typeOffset > minIndex) typeOffset--;
-        int xPos = (int)activeTile.x + typeOffset;
-        while (tiles[xPos, (int)activeTile.y].locked && xPos > minIndex)
+        // ####################################### Typing Logic #######################################
+        // ######################################## Horzontal #########################################
+        if (isTypingHorizontal)
         {
-          typeOffset--;
-          xPos = (int)activeTile.x + typeOffset;
-        }
-
-        // Only empty unlocked tiles.
-        if (!tiles[xPos, (int)activeTile.y].locked)
-        {
-          // Remove runningScore if it was added
-          if (runningScore > 0)
+          // Code will check if enter/backspace is pressed. If not,
+          // then it checks what the user is typing in.
+          if (Input.GetKeyDown(KeyCode.Backspace))
           {
-            LetterValues letterVal;
-            if (Enum.TryParse(tiles[xPos, (int)activeTile.y].GetLetter().ToUpper(), out letterVal))
+            // Skip over locked tiles that already have letters
+            if ((int)activeTile.x + typeOffset > minIndex) typeOffset--;
+            int xPos = (int)activeTile.x + typeOffset;
+            while (tiles[xPos, (int)activeTile.y].locked && xPos > minIndex)
             {
-              runningScore -= (int)letterVal;
+              typeOffset--;
+              xPos = (int)activeTile.x + typeOffset;
+            }
+
+            // Only empty unlocked tiles.
+            if (!tiles[xPos, (int)activeTile.y].locked)
+            {
+              // Remove runningScore if it was added
+              if (runningScore > 0)
+              {
+                LetterValues letterVal;
+                if (Enum.TryParse(tiles[xPos, (int)activeTile.y].GetLetter().ToUpper(), out letterVal))
+                {
+                  runningScore -= (int)letterVal;
+                }
+              }
+
+              // Reset tile
+              tiles[xPos, (int)activeTile.y].ChangeLetter("");
+              wordTiles.Pop();
+              User.player.AddToHand(tokensUsed.Pop());
+              currentWord = currentWord.Remove(currentWord.Length - 1, 1);
             }
           }
-
-          // Reset tile
-          tiles[xPos, (int)activeTile.y].ChangeLetter("");
-          wordTiles.Pop();
-          User.player.AddToHand(tokensUsed.Pop());
-          currentWord = currentWord.Remove(currentWord.Length - 1, 1);
-        }
-      }
-      else if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
-      {
-        isTypingHorizontal = false;
-
-        // Check if there is a letter afterwards and add them to word if needed.
-        int xPos = (int)activeTile.x + typeOffset;
-        while (xPos < width && tiles[xPos, (int)activeTile.y].GetLetter() != "")
-        {
-          currentWord += tiles[xPos, (int)activeTile.y].GetLetter();
-          LetterValues letterVal;
-          if (Enum.TryParse(tiles[xPos, (int)activeTile.y].GetLetter().ToUpper(), out letterVal))
+          else if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
           {
-            runningScore += (int)letterVal;
-          }
-          typeOffset++;
-          xPos = (int)activeTile.x + typeOffset;
-        }
-        typeOffset = 0;
+            isTypingHorizontal = false;
 
-        // TODO: VALIDATE WORD
-
-        if (!GameDictionary.ValidateWord(currentWord))
-        {
-          while (wordTiles.Count > 0) wordTiles.Pop().ChangeLetter("");
-          while (tokensUsed.Count > 0) User.player.AddToHand(tokensUsed.Pop());
-        }
-
-        // Check if first word has been placed
-        if (!firstWordPlaced)
-        {
-          // If not, then check if the word to be placed
-          // is in the center.
-          foreach (TileUnit t in wordTiles)
-          {
-            if (t.gridPoint == centerOfGrid)
+            // Check if there is a letter afterwards and add them to word if needed.
+            int xPos = (int)activeTile.x + typeOffset;
+            while (xPos < width && tiles[xPos, (int)activeTile.y].GetLetter() != "")
             {
-              firstWordPlaced = true;
-              break;
+              currentWord += tiles[xPos, (int)activeTile.y].GetLetter();
+              LetterValues letterVal;
+              if (Enum.TryParse(tiles[xPos, (int)activeTile.y].GetLetter().ToUpper(), out letterVal))
+              {
+                runningScore += (int)letterVal;
+              }
+              typeOffset++;
+              xPos = (int)activeTile.x + typeOffset;
+            }
+            typeOffset = 0;
+
+            // TODO: VALIDATE WORD
+            ValidateWord();
+            // TODO: SCORE WORD
+            SubmitWord();
+          }
+          else
+          {
+            // Input needs to be filtered out before used. Unity/C# will read ALL
+            // input, including ones that don't produce a legible character.
+            string rawInput = Input.inputString;
+            string filteredInput = Regex.Replace(rawInput, "[^A-Za-z]", "").ToUpper();
+            Token tokenFromHand;
+            if (filteredInput != "" && User.player.RetrieveToken(User.player.GetTokenFromLetter(filteredInput), out tokenFromHand))
+            {
+              // Loop is used to skip over characters to allow users to "add" to a word.
+              // Essentially just skips tiles with letters in them already.
+              int xPos = (int)activeTile.x + typeOffset;
+              while (xPos < width && tiles[xPos, (int)activeTile.y].GetLetter() != "")
+              {
+                currentWord += tiles[xPos, (int)activeTile.y].GetLetter();
+                LetterValues letterVal;
+                if (Enum.TryParse(tiles[xPos, (int)activeTile.y].GetLetter().ToUpper(), out letterVal))
+                {
+                  runningScore += (int)letterVal;
+                }
+                typeOffset++;
+                xPos = (int)activeTile.x + typeOffset;
+              }
+
+              // Prevent from typing outside of grid.
+              if (xPos < width)
+              {
+                tiles[xPos, (int)activeTile.y].ChangeLetter(filteredInput);
+                wordTiles.Push(tiles[xPos, (int)activeTile.y]);
+                tokensUsed.Push(tokenFromHand);
+                currentWord += filteredInput;
+                typeOffset++;
+              }
             }
           }
+        }
 
-          // If it is not in the center, reset the word.
-          if (!firstWordPlaced)
+        // ######################################## Vertical #########################################
+        else if (isTypingVertical)
+        {
+          if (Input.GetKeyDown(KeyCode.Backspace))
           {
-            while (wordTiles.Count > 0) wordTiles.Pop().ChangeLetter("");
-            while (tokensUsed.Count > 0) User.player.AddToHand(tokensUsed.Pop());
+            // Skip over locked tiles that already have letters
+            if ((int)activeTile.y - typeOffset < minIndex) typeOffset--;
+            int yPos = (int)activeTile.y - typeOffset;
+            while (tiles[(int)activeTile.x, yPos].locked && yPos < minIndex)
+            {
+              typeOffset--;
+              yPos = (int)activeTile.y - typeOffset;
+            }
+
+            // Only empty unlocked tiles
+            if (!tiles[(int)activeTile.x, yPos].locked)
+            {
+              // Remove score if it was added
+              if (runningScore > 0)
+              {
+                LetterValues letterVal;
+                if (Enum.TryParse(tiles[(int)activeTile.x, yPos].GetLetter().ToUpper(), out letterVal))
+                {
+                  runningScore -= (int)letterVal;
+                }
+              }
+
+              // Reset tile
+              tiles[(int)activeTile.x, yPos].ChangeLetter("");
+              wordTiles.Pop();
+              User.player.AddToHand(tokensUsed.Pop());
+              currentWord = currentWord.Remove(currentWord.Length - 1, 1);
+            }
+          }
+          else if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
+          {
+            isTypingVertical = false;
+            // Check if there is a letter afterwards and if there are, add them to word as needed.
+            int yPos = (int)activeTile.y - typeOffset;
+            while (yPos > -1 && tiles[(int)activeTile.x, yPos].GetLetter() != "")
+            {
+              currentWord += tiles[(int)activeTile.x, yPos].GetLetter();
+              LetterValues letterVal;
+              if (Enum.TryParse(tiles[(int)activeTile.x, yPos].GetLetter().ToUpper(), out letterVal))
+              {
+                runningScore += (int)letterVal;
+              }
+              typeOffset++;
+              yPos = (int)activeTile.y - typeOffset;
+            }
+            typeOffset = 0;
+
+            // TODO: VALIDATE WORD
+            ValidateWord();
+            // TODO: SCORE WORD
+            SubmitWord();
+          }
+          else
+          {
+            string rawInput = Input.inputString;
+            string filteredInput = Regex.Replace(rawInput, "[^A-Za-z0-9]", "").ToUpper();
+            Token tokenFromHand;
+            if (filteredInput != "" && User.player.RetrieveToken(User.player.GetTokenFromLetter(filteredInput), out tokenFromHand))
+            {
+              // Skip over tiles with letters in them already
+              int yPos = (int)activeTile.y - typeOffset;
+              while (yPos > -1 && tiles[(int)activeTile.x, yPos].GetLetter() != "")
+              {
+                currentWord += tiles[(int)activeTile.x, yPos].GetLetter();
+                LetterValues letterVal;
+                if (Enum.TryParse(tiles[(int)activeTile.x, yPos].GetLetter().ToUpper(), out letterVal))
+                {
+                  runningScore += (int)letterVal;
+                }
+                typeOffset++;
+                yPos = (int)activeTile.y - typeOffset;
+              }
+
+              // Prevent from typing outside of grid.
+              if (yPos > -1)
+              {
+                tiles[(int)activeTile.x, yPos].ChangeLetter(filteredInput);
+                wordTiles.Push(tiles[(int)activeTile.x, yPos]);
+                tokensUsed.Push(tokenFromHand);
+                currentWord += filteredInput;
+                typeOffset++;
+              }
+            }
           }
         }
-        // TODO: SCORE WORD
-        while (tokensUsed.Count > 0)
-        {
-          Token t = tokensUsed.Pop();
-          runningScore += t.pointValue;
-          Destroy(t.gameObject);
-        }
-        while (wordTiles.Count > 0)
-        {
-          TileUnit t = wordTiles.Pop();
-          runningScore += t.pointValue;
-          runningScore = t.PointModifier(runningScore);
-          t.ChangeColor(Color.red);
-          t.LockTyping();
-        }
-        User.player.DrawToMaxHand();
-        playerManager.updateUserScore(User.player.score + runningScore);
-        currentWord = "";
       }
       else
       {
-        // Input needs to be filtered out before used. Unity/C# will read ALL
-        // input, including ones that don't produce a legible character.
-        string rawInput = Input.inputString;
-        string filteredInput = Regex.Replace(rawInput, "[^A-Za-z]", "").ToUpper();
-        Token tokenFromHand;
-        if (filteredInput != "" && User.player.RetrieveToken(User.player.GetTokenFromLetter(filteredInput), out tokenFromHand))
-        {
-          // Loop is used to skip over characters to allow users to "add" to a word.
-          // Essentially just skips tiles with letters in them already.
-          int xPos = (int)activeTile.x + typeOffset;
-          while (xPos < width && tiles[xPos, (int)activeTile.y].GetLetter() != "")
-          {
-            currentWord += tiles[xPos, (int)activeTile.y].GetLetter();
-            LetterValues letterVal;
-            if (Enum.TryParse(tiles[xPos, (int)activeTile.y].GetLetter().ToUpper(), out letterVal))
-            {
-              runningScore += (int)letterVal;
-            }
-            typeOffset++;
-            xPos = (int)activeTile.x + typeOffset;
-          }
-
-          // Prevent from typing outside of grid.
-          if (xPos < width)
-          {
-            tiles[xPos, (int)activeTile.y].ChangeLetter(filteredInput);
-            wordTiles.Push(tiles[xPos, (int)activeTile.y]);
-            tokensUsed.Push(tokenFromHand);
-            currentWord += filteredInput;
-            typeOffset++;
-          }
-        }
+        playerManager.ComputerPassTurn();
       }
     }
+  }
 
-    // ######################################## Vertical #########################################
-    else if (isTypingVertical)
+  private void ValidateWord()
+  {
+    if (!GameDictionary.ValidateWord(currentWord))
     {
-      if (Input.GetKeyDown(KeyCode.Backspace))
+      while (wordTiles.Count > 0) wordTiles.Pop().ChangeLetter("");
+      while (tokensUsed.Count > 0) User.player.AddToHand(tokensUsed.Pop());
+    }
+    // Check if first word has been placed
+    if (!firstWordPlaced)
+    {
+      // If not, then check if the word to be placed
+      // is in the center.
+      foreach (TileUnit t in wordTiles)
       {
-        // Skip over locked tiles that already have letters
-        if ((int)activeTile.y - typeOffset < minIndex) typeOffset--;
-        int yPos = (int)activeTile.y - typeOffset;
-        while (tiles[(int)activeTile.x, yPos].locked && yPos < minIndex)
+        if (t.gridPoint == centerOfGrid)
         {
-          typeOffset--;
-          yPos = (int)activeTile.y - typeOffset;
-        }
-
-        // Only empty unlocked tiles
-        if (!tiles[(int)activeTile.x, yPos].locked)
-        {
-          // Remove score if it was added
-          if (runningScore > 0)
-          {
-            LetterValues letterVal;
-            if (Enum.TryParse(tiles[(int)activeTile.x, yPos].GetLetter().ToUpper(), out letterVal))
-            {
-              runningScore -= (int)letterVal;
-            }
-          }
-
-          // Reset tile
-          tiles[(int)activeTile.x, yPos].ChangeLetter("");
-          wordTiles.Pop();
-          User.player.AddToHand(tokensUsed.Pop());
-          currentWord = currentWord.Remove(currentWord.Length - 1, 1);
+          firstWordPlaced = true;
+          break;
         }
       }
-      else if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
+
+      // If it is not in the center, reset the word.
+      if (!firstWordPlaced)
       {
-        isTypingVertical = false;
-        // Check if there is a letter afterwards and if there are, add them to word as needed.
-        int yPos = (int)activeTile.y - typeOffset;
-        while (yPos > -1 && tiles[(int)activeTile.x, yPos].GetLetter() != "")
+        foreach (TileUnit t in wordTiles)
         {
-          currentWord += tiles[(int)activeTile.x, yPos].GetLetter();
-          LetterValues letterVal;
-          if (Enum.TryParse(tiles[(int)activeTile.x, yPos].GetLetter().ToUpper(), out letterVal))
-          {
-            runningScore += (int)letterVal;
-          }
-          typeOffset++;
-          yPos = (int)activeTile.y - typeOffset;
+          t.ChangeLetter("");
         }
-        typeOffset = 0;
-
-        // TODO: VALIDATE WORD
-        if (!GameDictionary.ValidateWord(currentWord))
-        {
-          while (wordTiles.Count > 0) wordTiles.Pop().ChangeLetter("");
-          while (tokensUsed.Count > 0) User.player.AddToHand(tokensUsed.Pop());
-        }
-        // Check if first word has been placed
-        if (!firstWordPlaced)
-        {
-          // If not, then check if the word to be placed
-          // is in the center.
-          foreach (TileUnit t in wordTiles)
-          {
-            if (t.gridPoint == centerOfGrid)
-            {
-              firstWordPlaced = true;
-              break;
-            }
-          }
-
-          // If it is not in the center, reset the word.
-          if (!firstWordPlaced)
-          {
-            foreach (TileUnit t in wordTiles)
-            {
-              t.ChangeLetter("");
-            }
-            while (tokensUsed.Count > 0) User.player.AddToHand(tokensUsed.Pop());
-            wordTiles.Clear();
-          }
-        }
-        // TODO: SCORE WORD
-        while (tokensUsed.Count > 0)
-        {
-          Token t = tokensUsed.Pop();
-          runningScore += t.pointValue;
-          Destroy(t.gameObject);
-        }
-        while (wordTiles.Count > 0)
-        {
-          TileUnit t = wordTiles.Pop();
-          runningScore += t.pointValue;
-          runningScore = t.PointModifier(runningScore);
-          t.ChangeColor(Color.red);
-          t.LockTyping();
-        }
-        User.player.DrawToMaxHand();
-        playerManager.updateUserScore(User.player.score + runningScore);
-        currentWord = "";
-      }
-      else
-      {
-        string rawInput = Input.inputString;
-        string filteredInput = Regex.Replace(rawInput, "[^A-Za-z0-9]", "").ToUpper();
-        Token tokenFromHand;
-        if (filteredInput != "" && User.player.RetrieveToken(User.player.GetTokenFromLetter(filteredInput), out tokenFromHand))
-        {
-          // Skip over tiles with letters in them already
-          int yPos = (int)activeTile.y - typeOffset;
-          while (yPos > -1 && tiles[(int)activeTile.x, yPos].GetLetter() != "")
-          {
-            currentWord += tiles[(int)activeTile.x, yPos].GetLetter();
-            LetterValues letterVal;
-            if (Enum.TryParse(tiles[(int)activeTile.x, yPos].GetLetter().ToUpper(), out letterVal))
-            {
-              runningScore += (int)letterVal;
-            }
-            typeOffset++;
-            yPos = (int)activeTile.y - typeOffset;
-          }
-
-          // Prevent from typing outside of grid.
-          if (yPos > -1)
-          {
-            tiles[(int)activeTile.x, yPos].ChangeLetter(filteredInput);
-            wordTiles.Push(tiles[(int)activeTile.x, yPos]);
-            tokensUsed.Push(tokenFromHand);
-            currentWord += filteredInput;
-            typeOffset++;
-          }
-        }
+        while (tokensUsed.Count > 0) User.player.AddToHand(tokensUsed.Pop());
+        wordTiles.Clear();
       }
     }
+  }
+
+  private void SubmitWord()
+  {
+    while (tokensUsed.Count > 0)
+    {
+      Token t = tokensUsed.Pop();
+      runningScore += t.pointValue;
+      Destroy(t.gameObject);
+    }
+    while (wordTiles.Count > 0)
+    {
+      TileUnit t = wordTiles.Pop();
+      runningScore += t.pointValue;
+      runningScore = t.PointModifier(runningScore);
+      t.ChangeColor(Color.cyan);
+      t.LockTyping();
+    }
+    User.player.DrawToMaxHand();
+    playerManager.updateUserScore(User.player.score + runningScore);
+    currentWord = "";
+    playerManager.ChangeActivePlayer(Computer.player);
   }
 
 
@@ -363,18 +341,21 @@ public class GridManager : MonoBehaviour
   //                           False for vertical (Top->Down)
   public void StartTyping(TileUnit startTile, bool horizontal)
   {
-    if (horizontal)
+    if (playerManager.IsHumanPlayer())
     {
-      isTypingHorizontal = true;
-      minIndex = (int) startTile.gridPoint.x;
+      if (horizontal)
+      {
+        isTypingHorizontal = true;
+        minIndex = (int)startTile.gridPoint.x;
+      }
+      else
+      {
+        isTypingVertical = true;
+        minIndex = (int)startTile.gridPoint.y;
+      }
+      activeTile = startTile.gridPoint;
+      runningScore = 0;
     }
-    else
-    {
-      isTypingVertical = true;
-      minIndex = (int)startTile.gridPoint.y;
-    }
-    activeTile = startTile.gridPoint;
-    runningScore = 0;
   }
 
 

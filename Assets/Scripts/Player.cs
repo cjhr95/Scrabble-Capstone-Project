@@ -13,24 +13,36 @@ namespace Assets
   public class Player : MonoBehaviour
   {
     public const int MAX_HAND_SIZE = 7;         // The maximum number of tokens allowed
+    public const float TIME_BONUS_RATE = 1.5f;
     public Token[] hand { get; private set; }   // The hand of tokens
     private int lastIndex;                      // Index to store where next empty slot is
-    public int turnTimeMS;                      // Turn time in milliseconds
+    public int turnTimeS;                      // Turn time in milliseconds
     public int score { get; private set; }
-    public PlayerType playerType {  get; private set; }
+    public bool StopTurns;
+    public int numPasses;
+    public bool GivenUp;
+    public PlayerType playerType { get; private set; }
+
 
     [SerializeField] private Token tokenPrefab;
 
-    public void Initialize(int turnTimeMS = 0, PlayerType playerType = default)
+    public void Initialize(PlayerType playerType = default)
     {
       hand = new Token[MAX_HAND_SIZE];
       lastIndex = 0;
       score = 0;
-      this.turnTimeMS = turnTimeMS;
+      turnTimeS = 0;
+      StopTurns = false;
+      GivenUp = false;
       this.playerType = playerType;
     }
 
     public void SetScore(int amt) { score = amt; }
+
+    public int FinalizedScore()
+    {
+      return score += (int)( turnTimeS * TIME_BONUS_RATE);
+    }
 
     // Description: Adds a token to the hand.
     //              Ignores token if the hand is full.
@@ -142,7 +154,7 @@ namespace Assets
     //              if it was able to, false otherwise.
     public bool DrawAToken()
     {
-      if (lastIndex < MAX_HAND_SIZE)
+      if (lastIndex < MAX_HAND_SIZE && LetterPoolManager.GetCurrentPoolSize() > 0)
       {
         var createdToken = Instantiate(tokenPrefab);
         createdToken.Initialize(LetterPoolManager.RetrieveLetterFromPool());

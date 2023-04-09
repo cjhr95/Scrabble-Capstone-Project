@@ -62,6 +62,11 @@ namespace Assets
       return rand_char;
     }
 
+    public static int GetCurrentPoolSize()
+    {
+      return letters.Count;
+    }
+
     // Description: Obtains the number of a particular letter
     //              left in the pool.
     // Returns:     The letter count.
