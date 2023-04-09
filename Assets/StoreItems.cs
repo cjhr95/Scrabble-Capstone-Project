@@ -63,7 +63,7 @@ namespace Assets
     public class Multiplier : StoreItem
     {
         /*
-        Store item to multiply a score - random for a buff (2x) or debuff (0.5x)
+        Store item to multiply a score - random for a buff (1.5x) or debuff (0.5x)
         If bought, the multiplier variable is used to affect the word score
         */
         private bool status;            // Flag to determine if this item is a debuff or a buff; default is buff
@@ -79,7 +79,7 @@ namespace Assets
             if(rand_mod.NextDouble() > 0.5)
             {
                 status = true;      // Item is a buff
-                multiplier = 2.0;   // When used, word score is multiplied by 2
+                multiplier = 1.5;   // When used, word score is multiplied by 1.5
             }
             else
             {
@@ -89,7 +89,7 @@ namespace Assets
         }
         // Description: Activates the multiplier bonus on player or
         //              opponent depending on status of the object
-        // Not sure how to implement this yet
+        // Will add multiplier to Score updating function
         public void activate()
         {
             if(status)
