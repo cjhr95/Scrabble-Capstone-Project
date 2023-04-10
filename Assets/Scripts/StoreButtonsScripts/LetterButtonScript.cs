@@ -40,7 +40,7 @@ namespace Assets
         }
       }
       else
-        Debug.Log("User was too poor to afford Letter");
+        Debug.Log("User was too poor to afford Letter: Score = " + User.player.score);
     }
   }
 }

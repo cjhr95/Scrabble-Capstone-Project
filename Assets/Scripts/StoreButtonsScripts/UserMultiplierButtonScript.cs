@@ -34,7 +34,7 @@ namespace Assets
         MultiplierObj.activate(User.player);
       }
       else
-        Debug.Log("User was too poor to afford User Multiplier");
+        Debug.Log("User was too poor to afford User Multiplier: Score = " + User.player.score);
     }
   }
 }

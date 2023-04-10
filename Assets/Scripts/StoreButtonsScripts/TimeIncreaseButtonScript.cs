@@ -33,7 +33,7 @@ namespace Assets
         TimeIncreaseObj.activate(User.player);
       }
       else
-        Debug.Log("User was too poor to afford TimeIncrease");
+        Debug.Log("User was too poor to afford TimeIncrease: Score = " + User.player.score);
     }
   }
 }

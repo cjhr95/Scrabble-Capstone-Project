@@ -257,6 +257,7 @@ GameObject:
   - component: {fileID: 41710653}
   - component: {fileID: 41710652}
   - component: {fileID: 41710651}
+  - component: {fileID: 41710654}
   m_Layer: 5
   m_Name: ComputerMultiplierStoreItem
   m_TagString: Untagged
@@ -282,7 +283,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.7965778, y: 0.40300003}
   m_AnchorMax: {x: 0.84153676, y: 0.47546622}
-  m_AnchoredPosition: {x: 0.2999878, y: -3.7000008}
+  m_AnchoredPosition: {x: 0.2999878, y: -3.699997}
   m_SizeDelta: {x: -1, y: 8}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &41710651
@@ -329,7 +330,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 11500000, guid: 55da2b0278bb6ea4ea806786408d389e, type: 3}
+      - m_Target: {fileID: 11500000, guid: d0a78f86e9903a64c9712257e5f8f15d, type: 3}
         m_TargetAssemblyTypeName: UnityEngine.Object, UnityEngine
         m_MethodName: 
         m_Mode: 1
@@ -340,7 +341,7 @@ MonoBehaviour:
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
-        m_CallState: 1
+        m_CallState: 2
 --- !u!114 &41710652
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -379,6 +380,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 41710649}
   m_CullTransparentMesh: 1
+--- !u!114 &41710654
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 41710649}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0a78f86e9903a64c9712257e5f8f15d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  button: {fileID: 41710651}
 --- !u!1001 &90242392
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -877,6 +891,7 @@ GameObject:
   - component: {fileID: 487581437}
   - component: {fileID: 487581436}
   - component: {fileID: 487581435}
+  - component: {fileID: 487581438}
   m_Layer: 5
   m_Name: LetterStoreItem
   m_TagString: Untagged
@@ -950,17 +965,17 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 11500000, guid: ccc4500ac29f24d4ea134c53a29a30dc, type: 3}
-        m_TargetAssemblyTypeName: 
+        m_TargetAssemblyTypeName: UnityEngine.Object, UnityEngine
         m_MethodName: 
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: 
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: 
+          m_StringArgument: onClick()
           m_BoolArgument: 0
-        m_CallState: 1
+        m_CallState: 2
 --- !u!114 &487581436
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -999,6 +1014,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 487581433}
   m_CullTransparentMesh: 1
+--- !u!114 &487581438
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 487581433}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ccc4500ac29f24d4ea134c53a29a30dc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  button: {fileID: 487581435}
+  userInput: 
 --- !u!1 &501559707
 GameObject:
   m_ObjectHideFlags: 0
@@ -2356,6 +2385,7 @@ GameObject:
   - component: {fileID: 1218787509}
   - component: {fileID: 1218787508}
   - component: {fileID: 1218787507}
+  - component: {fileID: 1218787510}
   m_Layer: 5
   m_Name: TimeIncreaseStoreItem
   m_TagString: Untagged
@@ -2439,7 +2469,7 @@ MonoBehaviour:
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
-        m_CallState: 1
+        m_CallState: 2
 --- !u!114 &1218787508
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2478,6 +2508,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1218787505}
   m_CullTransparentMesh: 1
+--- !u!114 &1218787510
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1218787505}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 32319665cc60e874399c94520afccdbc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  button: {fileID: 1218787507}
 --- !u!1 &1242026141
 GameObject:
   m_ObjectHideFlags: 0
@@ -2920,7 +2963,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.025688311, y: 0.23855767}
   m_AnchorMax: {x: 0.177, y: 0.29572117}
-  m_AnchoredPosition: {x: -1.0599365, y: -1.0000305}
+  m_AnchoredPosition: {x: -1.0599365, y: -1.000061}
   m_SizeDelta: {x: 3, y: -2}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1414462563
@@ -3472,10 +3515,10 @@ RectTransform:
   m_Father: {fileID: 100455096}
   m_RootOrder: 23
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.8688842, y: 0.12980068}
+  m_AnchorMin: {x: 0.8688842, y: 0.09323589}
   m_AnchorMax: {x: 0.9358095, y: 0.7395754}
-  m_AnchoredPosition: {x: 64.79999, y: 149.8}
-  m_SizeDelta: {x: 125, y: -301}
+  m_AnchoredPosition: {x: 64.79999, y: 160.8}
+  m_SizeDelta: {x: 125, y: -323}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1799479528
 MonoBehaviour:
@@ -3500,13 +3543,13 @@ MonoBehaviour:
   m_text: '50
 
 
+    200
+
+
+    200
+
+
     100
-
-
-    200
-
-
-    200
 
 
     500'
@@ -3536,8 +3579,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 34
-  m_fontSizeBase: 34
+  m_fontSize: 35
+  m_fontSizeBase: 35
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -3572,7 +3615,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 127.792114, w: -300.27545}
+  m_margin: {x: 0, y: 5.0272217, z: 127.792114, w: -321.0845}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -3733,6 +3776,7 @@ GameObject:
   - component: {fileID: 1912748545}
   - component: {fileID: 1912748544}
   - component: {fileID: 1912748543}
+  - component: {fileID: 1912748546}
   m_Layer: 5
   m_Name: UserMultiplierStoreItem
   m_TagString: Untagged
@@ -3805,7 +3849,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 11500000, guid: 4e8c1eb0bc6827b4fbc0ccfab93fde0d, type: 3}
+      - m_Target: {fileID: 11500000, guid: bf2b80efcd1f0364b97d02bb0028b441, type: 3}
         m_TargetAssemblyTypeName: 
         m_MethodName: 
         m_Mode: 1
@@ -3855,6 +3899,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1912748541}
   m_CullTransparentMesh: 1
+--- !u!114 &1912748546
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1912748541}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf2b80efcd1f0364b97d02bb0028b441, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  button: {fileID: 1912748543}
 --- !u!1 &2034742289
 GameObject:
   m_ObjectHideFlags: 0
@@ -3867,6 +3924,7 @@ GameObject:
   - component: {fileID: 2034742293}
   - component: {fileID: 2034742292}
   - component: {fileID: 2034742291}
+  - component: {fileID: 2034742294}
   m_Layer: 5
   m_Name: LetterSwapStoreItem
   m_TagString: Untagged
@@ -3892,7 +3950,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.79834616, y: 0.25380072}
   m_AnchorMax: {x: 0.84411585, y: 0.34046623}
-  m_AnchoredPosition: {x: -0.1000061, y: -0.30000305}
+  m_AnchoredPosition: {x: -0.1000061, y: -0.3000183}
   m_SizeDelta: {x: -2, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2034742291
@@ -3989,6 +4047,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2034742289}
   m_CullTransparentMesh: 1
+--- !u!114 &2034742294
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2034742289}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a061767d6b31402468e8f4b79217634a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  button: {fileID: 2034742291}
 --- !u!1 &2092140778
 GameObject:
   m_ObjectHideFlags: 0

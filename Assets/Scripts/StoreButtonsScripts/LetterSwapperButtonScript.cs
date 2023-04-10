@@ -33,7 +33,7 @@ namespace Assets
         LetterSwapperObj.activate(Computer.player);
       }
       else
-        Debug.Log("User was too poor to afford LetterSwapper");
+        Debug.Log("User was too poor to afford LetterSwapper: Score = " + User.player.score);
     }
   }
 }

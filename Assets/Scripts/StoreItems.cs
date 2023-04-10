@@ -17,7 +17,7 @@ namespace Assets
         protected string[] common_letters = {"A", "E", "I", "O", "N", "R", "T", "L", "S", "U"};
         protected string[] uncommon_letters = {"D", "B", "G", "C", "M", "P", "F", "H", "W", "Y"};
         protected string[] rare_letters = {"V", "K", "J", "X", "Q", "Z"};
-        [SerializeField] private Token tokenPrefab;
+        [SerializeField] protected static Token tokenPrefab;
         [SerializeField] private TextMeshProUGUI text;
 
         public void Update()
@@ -32,7 +32,8 @@ namespace Assets
         The Letter store item
         */
         // Member variables
-        private Token new_letter;    // Letter token object for the store
+        private string new_letter;    // Letter token object for the store
+        //Token new_letter = Instantiate(tokenPrefab);
 
         // Description: Constructor for the Letter StoreItem. Randomly selects the letter
         //              based on rarity
@@ -42,25 +43,31 @@ namespace Assets
             cost = 50;
             double probability = rand_mod.NextDouble();
             if (probability > 0.4)                                      // 60% chance for common letter (A, E, I, O, N, R, T, L, S, U)
-                new_letter.Initialize(common_letters[rand_mod.Next(0, common_letters.Length)]);
+                new_letter = common_letters[rand_mod.Next(0, common_letters.Length)];
             else if ((probability > 0.1) && (probability <= 0.4))       // 30% chance for uncommon letter (D, B, G, C, M, P, F, H, W, Y)
-                new_letter.Initialize(uncommon_letters[rand_mod.Next(0, common_letters.Length)]);
+                new_letter = uncommon_letters[rand_mod.Next(0, common_letters.Length)];
             else                                                       // 10% chance for rare letter (V, K, J, X, Q, Z)
-                new_letter.Initialize(rare_letters[rand_mod.Next(0, common_letters.Length)]);
+                new_letter = rare_letters[rand_mod.Next(0, common_letters.Length)];
         }
 
         // Description: Replaces a token in a player's hand
         public void activate(Player player, string letterToReplace)
         {
             Token tokenFromHand;
+            Token newToken = new Token();
+            newToken.Initialize(new_letter);
             if (player.hand.Length != Player.MAX_HAND_SIZE)
-                player.AddToHand(new_letter);
+            {
+                //Token newToken;
+                //newToken.Initialize(new_letter);
+                player.AddToHand(newToken);
+            }
             else
             {
                 if (player.HasToken(letterToReplace))
                 {
                     player.RetrieveToken(player.GetTokenFromLetter(letterToReplace), out tokenFromHand);
-                    player.AddToHand(new_letter);
+                    player.AddToHand(newToken);
                 }
             }
         }
@@ -119,7 +126,7 @@ namespace Assets
         /*
         Store item to swap a letter for a player; strictly a debuff item
         */
-        public Token swapToken;
+        private string swapLetter;
 
         // Description: Constructor for LetterSwapper debuff item. Randomly chooses
         //              a rare letter and swaps it from the opponet's hand
@@ -127,13 +134,15 @@ namespace Assets
         {
            storeWeight = 0.25;      // 25% chance to appear in the store
            cost = 100;
-           swapToken.Initialize(rare_letters[rand_mod.Next(0,rare_letters.Length)]);  // Select random letter from rare pool 
+           swapLetter = rare_letters[rand_mod.Next(0,rare_letters.Length)];  // Select random letter from rare pool 
         }
 
         // Description: Swaps a random letter from the passed player's hand
         public void activate(Player player)
         {
             Token tokenFromHand;
+            Token swapToken = new Token();
+            swapToken.Initialize(swapLetter);
             if(player.hand.Length != Player.MAX_HAND_SIZE)
                 player.AddToHand(swapToken);
             else
@@ -156,7 +165,7 @@ namespace Assets
         public TimeIncrease()
         {
             timeAdded = rand_mod.Next(1, 5);            // Returns a random integer 1-5
-            cost = 500;
+            cost = 50;
             storeWeight = 0.1;                          // 10% chance to appear in the store
         }
         
