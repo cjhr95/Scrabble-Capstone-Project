@@ -7,15 +7,14 @@ using UnityEngine.UI;
 
 namespace Assets
 {
-  public class UserMultiplierButtonScript : MonoBehaviour
+  public class ComputerMultiplierButtonScript : MonoBehaviour
   {
     [SerializeField] public Button button;
 
     // Start is called before the first frame update
     void Start()
     {
-      Button btn = button.GetComponent<Button>();
-      btn.onClick.AddListener(onClick);
+      button.onClick.AddListener(onClick);
     }
 
     // Update is called once per frame
@@ -25,14 +24,16 @@ namespace Assets
 
     void onClick()
     {
-      Debug.Log("Clicked User Multiplier Store Object");
+      Debug.Log("Clicked Computer Multiplier Store Object");
       // SceneManager.LoadScene("GameScene");
       var MultiplierObj = new Multiplier();
       if (User.player.score > MultiplierObj.cost)
       {
-        User.player.SetScore(-1 * MultiplierObj.cost);  // Subtract from score
-        MultiplierObj.activate(User.player);
+        User.player.SetScore(-1 * MultiplierObj.cost);  // Subtract form score
+        MultiplierObj.activate(Computer.player);
       }
+      else
+        Debug.Log("User was too poor to afford Computer Multiplier");
     }
   }
 }

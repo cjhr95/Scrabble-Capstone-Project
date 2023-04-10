@@ -49,4 +49,7 @@ MonoBehaviour:
   computerScore: {fileID: 0}
   userTime: {fileID: 0}
   computerTime: {fileID: 0}
-  DefaultTurnTimeS: 300
+  DefaultTurnTimeS: 15000
+  winnerText: {fileID: 0}
+  UserPassTurnButton: {fileID: 0}
+  GameOver: 0

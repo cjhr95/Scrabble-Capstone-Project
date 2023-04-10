@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace Assets
 {
-    public class StoreItem : MonoBehaviour
+    public class StoreItem
     {
         public int cost { get; set; }      // I don't know what to set for cost values yet
         public double storeWeight { get; set; }
@@ -22,8 +22,7 @@ namespace Assets
 
         public void Update()
         {
-            text.transform.position = gameObject.transform.position;
-            
+            //text.transform.position = gameObject.transform.position;
         }
     }
 

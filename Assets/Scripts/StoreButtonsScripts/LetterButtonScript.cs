@@ -39,6 +39,8 @@ namespace Assets
           User.player.SetScore(-1 * LetterObj.cost);    // Subtract from score
         }
       }
+      else
+        Debug.Log("User was too poor to afford Letter");
     }
   }
 }

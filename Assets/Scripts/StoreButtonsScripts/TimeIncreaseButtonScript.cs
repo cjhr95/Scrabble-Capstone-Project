@@ -32,6 +32,8 @@ namespace Assets
         User.player.SetScore(-1 * TimeIncreaseObj.cost);  // Subtract from score
         TimeIncreaseObj.activate(User.player);
       }
+      else
+        Debug.Log("User was too poor to afford TimeIncrease");
     }
   }
 }

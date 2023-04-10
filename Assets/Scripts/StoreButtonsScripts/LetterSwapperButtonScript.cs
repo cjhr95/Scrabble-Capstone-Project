@@ -32,6 +32,8 @@ namespace Assets
         User.player.SetScore(-1 * LetterSwapperObj.cost);       // Subtract from score
         LetterSwapperObj.activate(Computer.player);
       }
+      else
+        Debug.Log("User was too poor to afford LetterSwapper");
     }
   }
 }
