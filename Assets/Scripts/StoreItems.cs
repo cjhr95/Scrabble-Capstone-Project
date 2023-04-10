@@ -12,16 +12,18 @@ namespace Assets
     public class StoreItem : MonoBehaviour
     {
         public int cost { get; set; }      // I don't know what to set for cost values yet
-        public float storeWeight { get; set; }
-        Random rand_mod = new Random();
-        private char[] common_letters = {'A', 'E', 'I', 'O', 'N', 'R', 'T', 'L', 'S', 'U'};
-        private char[] uncommon_letters = {'D', 'B', 'G', 'C', 'M', 'P', 'F', 'H', 'W', 'Y'};
-        private char[] rare_letters = {'V', 'K', 'J', 'X', 'Q', 'Z'};
+        public double storeWeight { get; set; }
+        protected System.Random rand_mod = new System.Random();
+        protected string[] common_letters = {"A", "E", "I", "O", "N", "R", "T", "L", "S", "U"};
+        protected string[] uncommon_letters = {"D", "B", "G", "C", "M", "P", "F", "H", "W", "Y"};
+        protected string[] rare_letters = {"V", "K", "J", "X", "Q", "Z"};
+        [SerializeField] private Token tokenPrefab;
         [SerializeField] private TextMeshProUGUI text;
 
         public void Update()
         {
             text.transform.position = gameObject.transform.position;
+            
         }
     }
 
@@ -31,31 +33,32 @@ namespace Assets
         The Letter store item
         */
         // Member variables
-        private Token new_letter = Instantiate(tokenPrefab);    // Letter token object for the store
-        storeWeight = 0.5;                                      // 50% chance to appear in the store
+        private Token new_letter;    // Letter token object for the store
 
         // Description: Constructor for the Letter StoreItem. Randomly selects the letter
         //              based on rarity
-        public void Initialize()
+        public Letter()
         {
-            float probability = rand_mod.NextDouble();
-            if(probability > 0.4)                                      // 60% chance for common letter (A, E, I, O, N, R, T, L, S, U)
-                new_letter.tokenLetter = common_letters[rand_mod.Next(0, common_letters.Length)];
-            else if((probability > 0.1) && (probability <= 0.4))       // 30% chance for uncommon letter (D, B, G, C, M, P, F, H, W, Y)
-                new_letter.tokenLetter = uncommon_letters[rand_mod.Next(0, common_letters.Length)];
+            storeWeight = 0.5;          // 50% chance to appear in the store
+            double probability = rand_mod.NextDouble();
+            if (probability > 0.4)                                      // 60% chance for common letter (A, E, I, O, N, R, T, L, S, U)
+                new_letter.Initialize(common_letters[rand_mod.Next(0, common_letters.Length)]);
+            else if ((probability > 0.1) && (probability <= 0.4))       // 30% chance for uncommon letter (D, B, G, C, M, P, F, H, W, Y)
+                new_letter.Initialize(uncommon_letters[rand_mod.Next(0, common_letters.Length)]);
             else                                                       // 10% chance for rare letter (V, K, J, X, Q, Z)
-                new_letter.tokenLetter = rare_letters[rand_mod.Next(0, common_letters.Length)];
+                new_letter.Initialize(rare_letters[rand_mod.Next(0, common_letters.Length)]);
         }
 
         // Description: Replaces a token in a player's hand
         public void activate(ref Player player, Token letterToReplace)
         {
-            if (player.hand.Length != MAX_HAND_SIZE)
+            Token tokenFromHand;
+            if (player.hand.Length != Player.MAX_HAND_SIZE)
                 player.AddToHand(new_letter);
             else
             {
-                player.RetrieveToken(letterToReplace);
-                player.AddToHand(new_letter)
+                player.RetrieveToken(letterToReplace, out tokenFromHand);
+                player.AddToHand(new_letter);
             }
         }
     }
@@ -67,13 +70,13 @@ namespace Assets
         If bought, the multiplier variable is used to affect the word score
         */
         private bool status;            // Flag to determine if this item is a debuff or a buff; default is buff
-        private float multiplier;
-        storeWeight = 0.1;              // 10% chance to appear in the store 
+        private double multiplier;
         
         // Description: Constructor for the Multiplier StoreItem. Randomly determines
         //              if the object will be a buff or debuff
-        public void Initialize()
+        public Multiplier()
         {
+            storeWeight = 0.1;      // 10% chance to appear in the store
             status = true;
             multiplier = 0;
             if(rand_mod.NextDouble() > 0.5)
@@ -109,24 +112,25 @@ namespace Assets
         /*
         Store item to swap a letter for a player; strictly a debuff item
         */
-        public Token swapToken = Instantiate(tokenPrefab);
-        storeWeight = 0.25;                                 // 25% chance to appear in the store
+        public Token swapToken;
 
         // Description: Constructor for LetterSwapper debuff item. Randomly chooses
         //              a rare letter and swaps it from the opponet's hand
-        public void Initialize()
+        public LetterSwapper()
         {
-           swapToken.tokenLetter = rare_letters[rand_mod.Next(0,rare_letters.Length)]  // Select random letter from rare pool 
+           storeWeight = 0.25;      // 25% chance to appear in the store
+           swapToken.Initialize(rare_letters[rand_mod.Next(0,rare_letters.Length)]);  // Select random letter from rare pool 
         }
 
         // Description: Swaps a random letter from the passed player's hand
         public void activate(ref Player player)
         {
-            if(player.hand.Length != MAX_HAND_SIZE)
+            Token tokenFromHand;
+            if(player.hand.Length != Player.MAX_HAND_SIZE)
                 player.AddToHand(swapToken);
             else
             {
-                player.RetrieveToken(player.SelectRandomFromHand);
+                player.RetrieveToken(player.SelectRandomFromHand(), out tokenFromHand);
                 player.AddToHand(swapToken);
             }
         }
@@ -138,13 +142,19 @@ namespace Assets
         /*
         Store item to increase turn time
         */
-        private float timeAdded = rand_mod.Next(1, 4)*1000;     // Returns a random integer 1-3 and converts to milliseconds
-        storeWeight = 0.1;                                      // 10% chance to appear in the store
+        private int timeAdded;
+        
+        // Description: Constructor for TimeIncrease StoreItem
+        public TimeIncrease()
+        {
+            timeAdded = rand_mod.Next(1, 5);            // Returns a random integer 1-5
+            storeWeight = 0.1;                          // 10% chance to appear in the store
+        }
         
         // Description: Adds the timeAdded variable to a player's turn time
         public void activate(ref Player player)
         {
-            player.turnTimeMS = player.turnTimeMS + timeAdded;
+            player.turnTimeS = player.turnTimeS + timeAdded;
         }
     }
 }
