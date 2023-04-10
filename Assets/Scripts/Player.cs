@@ -50,13 +50,13 @@ namespace Assets
       if (multStatus == MultiplierStatus.Buff)
       {
         // Player has a buff active on themselves
-        score = (int)(amt * 1.5);  
+        score = score + (int)(amt * 1.5);  
         multStatus = MultiplierStatus.None;      // Reset multiplier status
       }
       else if (multStatus == MultiplierStatus.Debuff)
       {
         // Player (most likely the computer) has a debuff active
-        score = (int)(amt * 0.5); 
+        score = score + (int)(amt * 0.5); 
         multStatus = MultiplierStatus.None;      // Reset multiplier status
       }
       else

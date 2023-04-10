@@ -40,6 +40,7 @@ namespace Assets
         public Letter()
         {
             storeWeight = 0.5;          // 50% chance to appear in the store
+            cost = 50;
             double probability = rand_mod.NextDouble();
             if (probability > 0.4)                                      // 60% chance for common letter (A, E, I, O, N, R, T, L, S, U)
                 new_letter.Initialize(common_letters[rand_mod.Next(0, common_letters.Length)]);
@@ -50,15 +51,18 @@ namespace Assets
         }
 
         // Description: Replaces a token in a player's hand
-        public void activate(ref Player player, Token letterToReplace)
+        public void activate(Player player, string letterToReplace)
         {
             Token tokenFromHand;
             if (player.hand.Length != Player.MAX_HAND_SIZE)
                 player.AddToHand(new_letter);
             else
             {
-                player.RetrieveToken(letterToReplace, out tokenFromHand);
-                player.AddToHand(new_letter);
+                if (player.HasToken(letterToReplace))
+                {
+                    player.RetrieveToken(player.GetTokenFromLetter(letterToReplace), out tokenFromHand);
+                    player.AddToHand(new_letter);
+                }
             }
         }
     }
@@ -77,6 +81,7 @@ namespace Assets
         public Multiplier()
         {
             storeWeight = 0.1;      // 10% chance to appear in the store
+            cost = 200;
             status = true;
             multiplier = 0;
             if(rand_mod.NextDouble() > 0.5)
@@ -94,7 +99,7 @@ namespace Assets
         //              opponent based on passed Player object.
         //              Edits Player multiplier status to effect SetScore()
         //              function
-        public void activate(ref Player player)
+        public void activate(Player player)
         {
             if(status)
             {
@@ -122,11 +127,12 @@ namespace Assets
         public LetterSwapper()
         {
            storeWeight = 0.25;      // 25% chance to appear in the store
+           cost = 100;
            swapToken.Initialize(rare_letters[rand_mod.Next(0,rare_letters.Length)]);  // Select random letter from rare pool 
         }
 
         // Description: Swaps a random letter from the passed player's hand
-        public void activate(ref Player player)
+        public void activate(Player player)
         {
             Token tokenFromHand;
             if(player.hand.Length != Player.MAX_HAND_SIZE)
@@ -151,11 +157,12 @@ namespace Assets
         public TimeIncrease()
         {
             timeAdded = rand_mod.Next(1, 5);            // Returns a random integer 1-5
+            cost = 500;
             storeWeight = 0.1;                          // 10% chance to appear in the store
         }
         
         // Description: Adds the timeAdded variable to a player's turn time
-        public void activate(ref Player player)
+        public void activate(Player player)
         {
             player.turnTimeS = player.turnTimeS + timeAdded;
         }
