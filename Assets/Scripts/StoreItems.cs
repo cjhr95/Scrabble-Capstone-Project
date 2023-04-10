@@ -40,7 +40,7 @@ namespace Assets
         public Letter()
         {
             storeWeight = 0.5;          // 50% chance to appear in the store
-            cost = 50;
+            cost = 5;
             double probability = rand_mod.NextDouble();
             if (probability > 0.4)                                      // 60% chance for common letter (A, E, I, O, N, R, T, L, S, U)
                 new_letter = common_letters[rand_mod.Next(0, common_letters.Length)];
@@ -87,7 +87,7 @@ namespace Assets
         public Multiplier()
         {
             storeWeight = 0.1;      // 10% chance to appear in the store
-            cost = 200;
+            cost = 20;
             status = true;
             multiplier = 0;
             if(rand_mod.NextDouble() > 0.5)
@@ -133,7 +133,7 @@ namespace Assets
         public LetterSwapper()
         {
            storeWeight = 0.25;      // 25% chance to appear in the store
-           cost = 100;
+           cost = 10;
            swapLetter = rare_letters[rand_mod.Next(0,rare_letters.Length)];  // Select random letter from rare pool 
         }
 
@@ -165,7 +165,7 @@ namespace Assets
         public TimeIncrease()
         {
             timeAdded = rand_mod.Next(1, 5);            // Returns a random integer 1-5
-            cost = 50;
+            cost = 5;
             storeWeight = 0.1;                          // 10% chance to appear in the store
         }
         

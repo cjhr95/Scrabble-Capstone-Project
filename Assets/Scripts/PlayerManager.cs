@@ -63,6 +63,9 @@ public class PlayerManager : MonoBehaviour
       if (ActivePlayer.playerType == PlayerType.Human) userTime.text = changeText;
       else computerTime.text = changeText;
     }
+
+    userScore.text = "Score: " + User.player.score.ToString();
+    computerScore.text = "Computer Score: " + Computer.player.score.ToString();
   }
 
   public void UserPassTurn()
@@ -143,16 +146,4 @@ public class PlayerManager : MonoBehaviour
   }
 
   public bool IsHumanPlayer() { return ActivePlayer != null && ActivePlayer.playerType == PlayerType.Human; }
-
-  public void updateUserScore(int score)
-  {
-    User.player.SetScore(score);
-    userScore.text = "Score: " + score.ToString();
-  }
-
-  public void UpdateComputerScore(int score)
-  {
-    Computer.player.SetScore(score);
-    computerScore.text = "Computer Score: " + score.ToString();
-  }
 }

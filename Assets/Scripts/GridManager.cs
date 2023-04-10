@@ -335,7 +335,7 @@ public class GridManager : MonoBehaviour
       t.LockTyping();
     }
     User.player.DrawToMaxHand();
-    playerManager.updateUserScore(User.player.score + runningScore);
+    User.player.SetScore(User.player.score + runningScore);
     currentWord = "";
     playerManager.ChangeActivePlayer(Computer.player);
   }

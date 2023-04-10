@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -10,10 +11,14 @@ namespace Assets
   public class ComputerMultiplierButtonScript : MonoBehaviour
   {
     [SerializeField] public Button button;
+    [SerializeField] private TextMeshProUGUI costText;
+    StoreItem MultiplierObj;
 
     // Start is called before the first frame update
     void Start()
     {
+      MultiplierObj = new Multiplier();
+      costText.text = MultiplierObj.cost.ToString();
       button.onClick.AddListener(onClick);
     }
 
@@ -26,11 +31,10 @@ namespace Assets
     {
       Debug.Log("Clicked Computer Multiplier Store Object");
       // SceneManager.LoadScene("GameScene");
-      var MultiplierObj = new Multiplier();
       if (User.player.score > MultiplierObj.cost)
       {
         User.player.SetScore(-1 * MultiplierObj.cost);  // Subtract form score
-        MultiplierObj.activate(Computer.player);
+        ((Multiplier) MultiplierObj).activate(Computer.player);
       }
       else
         Debug.Log("User was too poor to afford Computer Multiplier: Score = " + User.player.score);
