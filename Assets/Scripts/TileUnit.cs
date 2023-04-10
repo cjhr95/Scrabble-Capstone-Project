@@ -37,7 +37,7 @@ public class TileUnit : MonoBehaviour
   public void Initialize(Vector2 pos, Vector2 arrPos, int pointVal = 0, string tileLetter = "", bool special = false, Color? color = null, System.Func<int, int>? specialModifierFunc = null)
   {
     locked = false;
-    baseColor = Color.white;
+    baseColor = Color.gray;
     hoverObject = Instantiate(hoverObject);
     hoverObject.Initialize();
     hoverObject.transform.position = gameObject.transform.position;

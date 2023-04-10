@@ -30,7 +30,6 @@ public class PlayerManager : MonoBehaviour
     TurnEndTimeS = 0;
     TurnStartTimeS = 0;
     GameOver = false;
-    winnerText.gameObject.SetActive(false);
     UserPassTurnButton.onClick.AddListener(UserPassTurn);
 
     // Create user
@@ -58,8 +57,8 @@ public class PlayerManager : MonoBehaviour
       string changeText = "Turn Time: " + TimeSpan.FromSeconds((int)(ActivePlayer.turnTimeS - (TurnEndTimeS - TurnStartTimeS))).ToString(@"mm\:ss");
       if ((ActivePlayer.turnTimeS - (TurnEndTimeS - TurnStartTimeS)) <= 0)
       {
-        if (ActivePlayer.playerType == PlayerType.Human) ChangeActivePlayer(Computer.player);
-        else ChangeActivePlayer(User.player);
+        Debug.Log("Game ended due to turn time out");
+        EndGame();
       }
       if (ActivePlayer.playerType == PlayerType.Human) userTime.text = changeText;
       else computerTime.text = changeText;
@@ -68,7 +67,6 @@ public class PlayerManager : MonoBehaviour
 
   public void UserPassTurn()
   {
-    Debug.Log(User.player.numPasses);
     if (ActivePlayer.playerType == PlayerType.Human)
     {
       User.player.numPasses++;
@@ -90,22 +88,16 @@ public class PlayerManager : MonoBehaviour
 
   public void ChangeActivePlayer(Player p)
   {
+    if (GameOver) return;
     if (ActivePlayer != null)
     {
       ActivePlayer.turnTimeS -= (int)(TurnEndTimeS - TurnStartTimeS);
-      if (p.turnTimeS <= 0)
-      {
-        if (ActivePlayer.turnTimeS <= 0)
-        {
-          EndGame();
-        }
-        return;
-      }
 
       if (LetterPoolManager.GetCurrentPoolSize() <= 0)
       {
         if (p.StopTurns)
         {
+          Debug.Log("Game ended due to stop turns");
           EndGame();
           return;
         } else
@@ -116,20 +108,28 @@ public class PlayerManager : MonoBehaviour
 
       if (p.GivenUp)
       {
-        if (ActivePlayer.GivenUp) EndGame();
+        
+        if (ActivePlayer.GivenUp)
+        {
+          Debug.Log("Game ended due to give up");
+          EndGame();
+        }
         else return;
       }
     }
     ActivePlayer = p;
+    if (IsHumanPlayer()) winnerText.text = "Your turn";
+    else winnerText.text = "Opponent's turn";
     TurnStartTimeS = Time.time;
   }
 
   public void EndGame()
   {
+    ActivePlayer = null;
     GameOver = true;
     userScore.text = "Score: " + User.player.FinalizedScore().ToString();
     computerScore.text = "Computer Score: " + Computer.player.FinalizedScore().ToString();
-    if (User.player.FinalizedScore() > Computer.player.FinalizedScore())
+    if (User.player.FinalizedScore() > Computer.player.FinalizedScore() && !User.player.GivenUp)
     {
       winnerText.text = "You win!";
     }
@@ -140,7 +140,6 @@ public class PlayerManager : MonoBehaviour
     {
       winnerText.text = "You lost bozo";
     }
-    winnerText.gameObject.SetActive(true);
   }
 
   public bool IsHumanPlayer() { return ActivePlayer != null && ActivePlayer.playerType == PlayerType.Human; }

@@ -22,7 +22,6 @@ public class PlayButtonScript : MonoBehaviour
 
   void onClick()
   {
-    Debug.Log("Clicked Play");
     SceneManager.LoadScene("GameScene");
   }
 }

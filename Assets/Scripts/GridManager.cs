@@ -56,8 +56,16 @@ public class GridManager : MonoBehaviour
         // TODO: Add logic to determine if tile is special.
         if (new Vector2(x,y) == centerOfGrid)
         {
-          createdTile.Initialize(new Vector2(x, y), new Vector2(x, y), color: Color.gray, pointVal: 100, specialModifierFunc: val => (int) (val * 1.25));
-        } else createdTile.Initialize(new Vector2(x, y), new Vector2(x, y));
+          createdTile.Initialize(new Vector2(x, y), new Vector2(x, y), color: Color.white);
+          //createdTile.Initialize(new Vector2(x, y), new Vector2(x, y), color: Color.gray, pointVal: 100, specialModifierFunc: val => (int) (val * 1.25));
+        } else
+        {
+          System.Random random = new System.Random();
+          int chance = random.Next(100);
+          if (chance <= 5) createdTile.Initialize(new Vector2(x, y), new Vector2(x, y), color: Color.red, pointVal: -random.Next(1, 3));
+          else if (chance <= 10) createdTile.Initialize(new Vector2(x, y), new Vector2(x, y), color: Color.green, pointVal: random.Next(1, 10));
+          else createdTile.Initialize(new Vector2(x, y), new Vector2(x, y));
+        }
       }
     }
   }

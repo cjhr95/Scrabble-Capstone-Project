@@ -35,10 +35,15 @@ namespace Assets
   }
   public class Token : MonoBehaviour
   {
+    public const int TOKEN_BONUS_LIFETIME = 15;
     public int remainingTime { get; set; }              // The timer for the token
     public string tokenLetter { get; private set; }     // The letter the token represents
     public int pointValue { get; private set; }         // The value of the token
+    private int minPoint;
+    private float creationTime;
+    PlayerManager playerManager;
     [SerializeField] private TextMeshProUGUI text;
+    [SerializeField] private TextMeshProUGUI pointValueText;
     
     // Description: Creates a token with the given letter.
     //              Attempts to assign the token a value based
@@ -46,8 +51,11 @@ namespace Assets
     //              it fails, then the point value will be 0.
     public void Initialize(string letter)
     {
+      playerManager = FindAnyObjectByType<PlayerManager>();
       tokenLetter = letter.ToUpper();
       text.text = tokenLetter;
+
+      creationTime = Time.time;
 
       LetterValues letterVal;
       if (Enum.TryParse(tokenLetter, out letterVal))
@@ -55,11 +63,16 @@ namespace Assets
         pointValue = (int)letterVal;
       }
       else pointValue = 0;
+
+      minPoint = pointValue;
     }
 
     public void Update()
     {
       text.transform.position = gameObject.transform.position;
+      int newPointVal = minPoint + (TOKEN_BONUS_LIFETIME - deltaTime());
+      if (playerManager.IsHumanPlayer()) pointValue = newPointVal >= minPoint ? newPointVal : minPoint;
+      pointValueText.text = pointValue.ToString();
     }
 
     public static bool operator ==(Token left, Token right)
@@ -85,6 +98,11 @@ namespace Assets
     public override int GetHashCode()
     {
       return HashCode.Combine(tokenLetter);
+    }
+
+    private int deltaTime()
+    {
+      return (int) (Time.time - creationTime);
     }
   }
 }

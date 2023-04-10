@@ -44,5 +44,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bb8e4f9c2bb848c47b70df60732fd422, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  turnTimeMS: 0
-  tokenPrefab: {fileID: 3796507199610658046, guid: 60844f03481f14144bf03053c3427f6e, type: 3}
+  turnTimeS: 0
+  StopTurns: 0
+  numPasses: 0
+  GivenUp: 0
+  tokenPrefab: {fileID: 6089838002713335187, guid: 60844f03481f14144bf03053c3427f6e, type: 3}

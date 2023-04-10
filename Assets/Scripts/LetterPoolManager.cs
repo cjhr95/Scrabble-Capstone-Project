@@ -32,8 +32,11 @@ namespace Assets
             if (i < 9) letters.AddRange(new char[] {'A', 'I'});
             if (i < 8) letters.Add('O');
             if (i < 6) letters.AddRange(new char[] { 'N', 'R', 'T' });
-            if (i < 4) letters.AddRange(new char[] { 'L', 'S', 'U' });
+            if (i < 4) letters.AddRange(new char[] { 'L', 'S', 'U', 'D' });
+            if (i < 3) letters.Add('G');
+            if (i < 2) letters.AddRange(new char[] { 'B', 'C', 'M', 'P', 'F', 'H', 'V', 'W', 'Y' });
           }
+          letters.Add('K');
           break;
         case PoolStyle.WeightedDistribution:
           char[] distribution = GetAlphabetDistributionArray();
