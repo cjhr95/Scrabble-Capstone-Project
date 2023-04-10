@@ -10,6 +10,12 @@ namespace Assets
     Computer,
     Human
   }
+  public enum MultiplierStatus
+  {
+    Debuff = -1,
+    None = 0,
+    Buff = 1
+  }
   public class Player : MonoBehaviour
   {
     public const int MAX_HAND_SIZE = 7;         // The maximum number of tokens allowed
@@ -22,6 +28,7 @@ namespace Assets
     public int numPasses;
     public bool GivenUp;
     public PlayerType playerType { get; private set; }
+    public MultiplierStatus multStatus { get; set;}
 
 
     [SerializeField] private Token tokenPrefab;
@@ -35,9 +42,26 @@ namespace Assets
       StopTurns = false;
       GivenUp = false;
       this.playerType = playerType;
+      multStatus = MultiplierStatus.None;
     }
 
-    public void SetScore(int amt) { score = amt; }
+    public void SetScore(int amt)
+    { 
+      if (multStatus == MultiplierStatus.Buff)
+      {
+        // Player has a buff active on themselves
+        score = (int)(amt * 1.5);  
+        multStatus = MultiplierStatus.None;      // Reset multiplier status
+      }
+      else if (multStatus == MultiplierStatus.Debuff)
+      {
+        // Player (most likely the computer) has a debuff active
+        score = (int)(amt * 0.5); 
+        multStatus = MultiplierStatus.None;      // Reset multiplier status
+      }
+      else
+        score = amt;            // No change to the score
+    }
 
     public int FinalizedScore()
     {

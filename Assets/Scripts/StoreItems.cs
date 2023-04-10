@@ -91,17 +91,20 @@ namespace Assets
             }
         }
         // Description: Activates the multiplier bonus on player or
-        //              opponent depending on status of the object
-        // Will add multiplier to Score updating function
-        public void activate()
+        //              opponent based on passed Player object.
+        //              Edits Player multiplier status to effect SetScore()
+        //              function
+        public void activate(ref Player player)
         {
             if(status)
             {
-                // Buff status; apply 2x bonus to next play
+                // Buff status; apply 1.5x bonus to next play
+                player.multStatus = MultiplierStatus.Buff;
             }
             else
             {
-                // Debuf status; apply 0.5x bonus to opponent's next play
+                // Debuff status; apply 0.5x bonus to opponent's next play
+                player.multStatus = MultiplierStatus.Debuff;
             }
             return;
         }
