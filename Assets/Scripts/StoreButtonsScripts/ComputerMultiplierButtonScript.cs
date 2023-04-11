@@ -31,9 +31,9 @@ namespace Assets
     {
       Debug.Log("Clicked Computer Multiplier Store Object");
       // SceneManager.LoadScene("GameScene");
-      if (User.player.score > MultiplierObj.cost)
+      if (User.player.score >= MultiplierObj.cost)
       {
-        User.player.SetScore(-1 * MultiplierObj.cost);  // Subtract form score
+        User.player.SetScore(User.player.score + (-1 * MultiplierObj.cost));  // Subtract form score
         ((Multiplier) MultiplierObj).activate(Computer.player);
       }
       else

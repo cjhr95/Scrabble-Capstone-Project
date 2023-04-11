@@ -9,20 +9,19 @@ using UnityEngine;
 
 namespace Assets
 {
-    public class StoreItem
+    public class StoreItem : MonoBehaviour
     {
-        public int cost { get; set; }      // I don't know what to set for cost values yet
+        public int cost { get; set; }
         public double storeWeight { get; set; }
         protected System.Random rand_mod = new System.Random();
         protected string[] common_letters = {"A", "E", "I", "O", "N", "R", "T", "L", "S", "U"};
         protected string[] uncommon_letters = {"D", "B", "G", "C", "M", "P", "F", "H", "W", "Y"};
         protected string[] rare_letters = {"V", "K", "J", "X", "Q", "Z"};
-        [SerializeField] protected static Token tokenPrefab;
-        [SerializeField] private TextMeshProUGUI text;
+
+        //[SerializeField] protected Token tokenPrefab;
 
         public void Update()
         {
-            //text.transform.position = gameObject.transform.position;
         }
     }
 
@@ -33,8 +32,8 @@ namespace Assets
         */
         // Member variables
         private string new_letter;    // Letter token object for the store
-        //Token new_letter = Instantiate(tokenPrefab);
-
+        [SerializeField] private Token tokenPrefab;
+        
         // Description: Constructor for the Letter StoreItem. Randomly selects the letter
         //              based on rarity
         public Letter()
@@ -54,7 +53,8 @@ namespace Assets
         public void activate(Player player, string letterToReplace)
         {
             Token tokenFromHand;
-            Token newToken = new Token();
+            // TODO: fix Object not being instantiated error
+            var newToken = Instantiate(tokenPrefab);
             newToken.Initialize(new_letter);
             if (player.hand.Length != Player.MAX_HAND_SIZE)
             {
@@ -79,7 +79,6 @@ namespace Assets
         Store item to multiply a score - random for a buff (1.5x) or debuff (0.5x)
         If bought, the multiplier variable is used to affect the word score
         */
-        private bool status;            // Flag to determine if this item is a debuff or a buff; default is buff
         private double multiplier;
         
         // Description: Constructor for the Multiplier StoreItem. Randomly determines
@@ -88,18 +87,7 @@ namespace Assets
         {
             storeWeight = 0.1;      // 10% chance to appear in the store
             cost = 20;
-            status = true;
             multiplier = 0;
-            if(rand_mod.NextDouble() > 0.5)
-            {
-                status = true;      // Item is a buff
-                multiplier = 1.5;   // When used, word score is multiplied by 1.5
-            }
-            else
-            {
-                status = false;     // Item is a debuff
-                multiplier = 0.5;   // When used, word score is multiplyed by 0.5
-            }
         }
         // Description: Activates the multiplier bonus on player or
         //              opponent based on passed Player object.
@@ -107,14 +95,16 @@ namespace Assets
         //              function
         public void activate(Player player)
         {
-            if(status)
+            if(player.playerType == PlayerType.Human)
             {
                 // Buff status; apply 1.5x bonus to next play
+                multiplier = 1.5;
                 player.multStatus = MultiplierStatus.Buff;
             }
             else
             {
                 // Debuff status; apply 0.5x bonus to opponent's next play
+                multiplier = 0.5;
                 player.multStatus = MultiplierStatus.Debuff;
             }
             return;
@@ -127,6 +117,7 @@ namespace Assets
         Store item to swap a letter for a player; strictly a debuff item
         */
         private string swapLetter;
+        [SerializeField] private Token tokenPrefab;
 
         // Description: Constructor for LetterSwapper debuff item. Randomly chooses
         //              a rare letter and swaps it from the opponet's hand
@@ -141,7 +132,8 @@ namespace Assets
         public void activate(Player player)
         {
             Token tokenFromHand;
-            Token swapToken = new Token();
+            // TODO: fix Object not being instantiated error
+            var swapToken = Instantiate(tokenPrefab);
             swapToken.Initialize(swapLetter);
             if(player.hand.Length != Player.MAX_HAND_SIZE)
                 player.AddToHand(swapToken);

@@ -31,9 +31,9 @@ namespace Assets
     {
       Debug.Log("Clicked Time Increase Store Object");
       // SceneManager.LoadScene("GameScene");
-      if (User.player.score > TimeIncreaseObj.cost)
+      if (User.player.score >= TimeIncreaseObj.cost)
       {
-        User.player.SetScore(-1 * TimeIncreaseObj.cost);  // Subtract from score
+        User.player.SetScore(User.player.score + (-1 * TimeIncreaseObj.cost));  // Subtract from score
         ((TimeIncrease)TimeIncreaseObj).activate(User.player);
       }
       else

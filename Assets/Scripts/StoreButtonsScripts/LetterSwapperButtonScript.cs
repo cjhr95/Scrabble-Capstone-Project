@@ -31,9 +31,9 @@ namespace Assets
     {
       Debug.Log("Clicked Letter Swapper Store Object");
       // SceneManager.LoadScene("GameScene");
-      if (User.player.score > LetterSwapperObj.cost)
+      if (User.player.score >= LetterSwapperObj.cost)
       {
-        User.player.SetScore(-1 * LetterSwapperObj.cost);       // Subtract from score
+        User.player.SetScore(User.player.score + (-1 * LetterSwapperObj.cost));       // Subtract from score
         ((LetterSwapper)LetterSwapperObj).activate(Computer.player);
       }
       else
