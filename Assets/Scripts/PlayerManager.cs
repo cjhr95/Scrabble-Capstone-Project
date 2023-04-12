@@ -79,8 +79,12 @@ public class PlayerManager : MonoBehaviour
     {
       User.player.numPasses++;
       if (User.player.numPasses == NUM_MAX_PASSES) UserPassTurnButton.GetComponentInChildren<TextMeshProUGUI>().text = "Give Up";
-      if (User.player.numPasses > NUM_MAX_PASSES) User.player.GivenUp = true;
-      ChangeActivePlayer(Computer.player);
+      if (User.player.numPasses > NUM_MAX_PASSES)
+      {
+        Debug.Log("Game ended due to give up");
+        User.player.GivenUp = true;
+        EndGame();
+      } else ChangeActivePlayer(Computer.player);
     }
   }
 
@@ -112,13 +116,6 @@ public class PlayerManager : MonoBehaviour
         {
           ActivePlayer.StopTurns = true;
         }
-      }
-
-      if (p.GivenUp)
-      {
-        Debug.Log("Game ended due to give up");
-        EndGame();
-        return;
       }
     }
     ActivePlayer = p;
