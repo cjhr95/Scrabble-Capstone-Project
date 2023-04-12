@@ -5,6 +5,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using static TMPro.TMP_InputField;
 
 namespace Assets
 {
@@ -12,6 +13,7 @@ namespace Assets
   {
     [SerializeField] public Button button;
     [SerializeField] private TextMeshProUGUI costText;
+    [SerializeField] private TMP_InputField inputField;
     StoreItem LetterObj;
     //public string userInput;
 
@@ -22,6 +24,7 @@ namespace Assets
       Button btn = button.GetComponent<Button>();
       btn.onClick.AddListener(onClick);
       costText.text = LetterObj.cost.ToString();
+      inputField.gameObject.SetActive(false);
     }
 
     // Update is called once per frame
@@ -36,21 +39,29 @@ namespace Assets
       // SceneManager.LoadScene("GameScene");
 
       // Create an InputField object for the user to enter a letter to swap
-      var userInput = gameObject.GetComponent<InputField>();
-      // TODO: fix Object not being instantiated error
-      userInput.onEndEdit.AddListener(SubmitName);
+      inputField.gameObject.SetActive(true);
 
       if (User.player.score >= LetterObj.cost)
       {
-        //print("Input the letter you want to swap:");
-        if (userInput.ToString().Length == 1)
-        {
-          ((Letter)LetterObj).activate(User.player, userInput.ToString());
-          User.player.SetScore(User.player.score + (-1 * LetterObj.cost));    // Subtract from score
-        }
+        StartCoroutine(haha());
       }
-      else
-        Debug.Log("User was too poor to afford Letter: Score = " + User.player.score);
+      else Debug.Log("User was too poor to afford Letter: Score = " + User.player.score);
+    }
+
+    IEnumerator haha()
+    {
+      Debug.Log(inputField.text);
+      while (true)
+      {
+        if (inputField.text.Length == 1)
+        {
+          ((Letter)LetterObj).activate(User.player, inputField.text.ToUpper());
+          User.player.SetScore(User.player.score + (-1 * LetterObj.cost));    // Subtract from score
+          inputField.gameObject.SetActive(false);
+          yield break;
+        }
+        yield return null;
+      }
     }
 
     private void SubmitName(string userLetter)

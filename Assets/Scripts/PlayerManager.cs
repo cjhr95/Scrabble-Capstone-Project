@@ -62,6 +62,7 @@ public class PlayerManager : MonoBehaviour
       if ((ActivePlayer.turnTimeS - (TurnEndTimeS - TurnStartTimeS)) <= 0)
       {
         Debug.Log("Game ended due to turn time out");
+        ActivePlayer.turnTimeS -= (int)(TurnEndTimeS - TurnStartTimeS);
         EndGame();
       }
       if (ActivePlayer.playerType == PlayerType.Human) userTime.text = changeText;
