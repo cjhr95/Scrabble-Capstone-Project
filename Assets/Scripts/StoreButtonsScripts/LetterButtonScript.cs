@@ -50,9 +50,11 @@ namespace Assets
 
     IEnumerator haha()
     {
-      Debug.Log(inputField.text);
+      //Debug.Log(inputField.text);
       while (true)
       {
+        inputField.onEndEdit.AddListener(SubmitName);
+        
         if (inputField.text.Length == 1)
         {
           ((Letter)LetterObj).activate(User.player, inputField.text.ToUpper());

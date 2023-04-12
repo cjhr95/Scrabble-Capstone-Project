@@ -34,8 +34,6 @@ public class Letter : StoreItem
       newToken.Initialize(new_letter);
       if (player.hand.Length != Player.MAX_HAND_SIZE)
       {
-        //Token newToken;
-        //newToken.Initialize(new_letter);
         player.AddToHand(newToken);
       }
       else
