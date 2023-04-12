@@ -11,7 +11,7 @@ using UnityEngine.UI;
 
 public class PlayerManager : MonoBehaviour
 {
-  public const int NUM_MAX_PASSES = 1;
+  public const int NUM_MAX_PASSES = 2;
 
   [SerializeField] private Player playerPrefab;
   [SerializeField] private TextMeshProUGUI userScore;
@@ -78,8 +78,8 @@ public class PlayerManager : MonoBehaviour
     if (ActivePlayer.playerType == PlayerType.Human)
     {
       User.player.numPasses++;
-      if (User.player.numPasses == 2) UserPassTurnButton.GetComponentInChildren<TextMeshProUGUI>().text = "Give Up";
-      if (User.player.numPasses > 2) User.player.GivenUp = true;
+      if (User.player.numPasses == NUM_MAX_PASSES) UserPassTurnButton.GetComponentInChildren<TextMeshProUGUI>().text = "Give Up";
+      if (User.player.numPasses > NUM_MAX_PASSES) User.player.GivenUp = true;
       ChangeActivePlayer(Computer.player);
     }
   }
@@ -89,7 +89,7 @@ public class PlayerManager : MonoBehaviour
     if (ActivePlayer.playerType == PlayerType.Computer)
     {
       Computer.player.numPasses++;
-      if (Computer.player.numPasses > 2) Computer.player.GivenUp = true;
+      if (Computer.player.numPasses > NUM_MAX_PASSES) Computer.player.GivenUp = true;
       ChangeActivePlayer(User.player);
     }
   }
@@ -116,13 +116,9 @@ public class PlayerManager : MonoBehaviour
 
       if (p.GivenUp)
       {
-        
-        if (ActivePlayer.GivenUp)
-        {
-          Debug.Log("Game ended due to give up");
-          EndGame();
-        }
-        else return;
+        Debug.Log("Game ended due to give up");
+        EndGame();
+        return;
       }
     }
     ActivePlayer = p;
@@ -150,7 +146,7 @@ public class PlayerManager : MonoBehaviour
       winnerText.text = "~~Tie~~";
     } else
     {
-      winnerText.text = "You lost bozo";
+      winnerText.text = "You lost :(";
     }
   }
 
@@ -159,11 +155,10 @@ public class PlayerManager : MonoBehaviour
   IEnumerator ComputerTurn()
   {
     System.Random random = new System.Random();
-    bool foundSolution = false;
     int score = 0;
-    while (!foundSolution)
+    while (!GameOver)
     {
-      yield return new WaitForSecondsRealtime(2.0f);
+      yield return new WaitForSecondsRealtime(4.0f);
       string word = GameDictionary.GenerateWord(random.Next(3, 7));
       for (int y = 0; y < gridManager.height; y++)
       {
@@ -175,17 +170,20 @@ public class PlayerManager : MonoBehaviour
             {
               bool valid = true;
 
-              for (int j = Math.Max(y - i, 0); j < Math.Min(y + (word.Length - i), gridManager.width); j++)
+              if (gridManager.tiles[Math.Max(y - i, 0), x].GetLetter() != "") valid = false;
+              for (int j = Math.Max(y - i, 0); j < Math.Min(y + (word.Length - i), gridManager.width-1); j++)
               {
-                if (gridManager.tiles[j, x].GetLetter() != "" && gridManager.tiles[j, x].GetLetter() != word[j - (y - i)].ToString()) valid = false;
+                if (gridManager.tiles[j, x].GetLetter() != "") 
+                  if (gridManager.tiles[j, x].GetLetter() != word[j - (y - i)].ToString()) valid = false;
               }
+              if (gridManager.tiles[Math.Min(y + (word.Length - i + 1) + 1, gridManager.width - 1), x].GetLetter() != "") valid = false;
 
               if (valid)
               {
+                Debug.Log(word);
                 if (y - i < 0) continue;
                 if (!gridManager.AddWordToGrid(new Vector2(y - i, x), word, true, Color.magenta, out score)) continue;
                 Computer.player.SetScore(Computer.player.score + score);
-                foundSolution = true;
                 ChangeActivePlayer(User.player); 
                 yield break;
               }
@@ -193,29 +191,28 @@ public class PlayerManager : MonoBehaviour
               // Vertical
               valid = true;
 
-              for (int j = Math.Min(x + i, gridManager.height); j > Math.Max(x - (word.Length - i), 0); j--)
+              if (gridManager.tiles[y, Math.Min(x + i + 1, gridManager.height-1)].GetLetter() != "") valid = false;
+              for (int j = Math.Min(x + i, gridManager.height - 1); j > Math.Max(x - (word.Length - i), 0); j--)
               {
                 if (gridManager.tiles[y, j].GetLetter() != "") 
                   if (gridManager.tiles[y, j].GetLetter() != word[(x + i) - j].ToString())
                     valid = false;
               }
+              if (gridManager.tiles[y, Math.Max(x - (word.Length - i + 1) - 1, 0)].GetLetter() != "") valid = false;
 
               if (valid)
               {
+                Debug.Log(word);
                 if (x + i > gridManager.height) continue;
                 if (!gridManager.AddWordToGrid(new Vector2(y, x + i), word, false, Color.magenta, out score)) continue;
                 Computer.player.SetScore(Computer.player.score + score);
-                foundSolution = true;
                 ChangeActivePlayer(User.player);
                 yield break;
               }
             }
           }
-          if (foundSolution) break;
         }
-        if (foundSolution) break;
       }
-      if (foundSolution) break;
     }
   }
 }

@@ -145,7 +145,8 @@ public class GridManager : MonoBehaviour
             typeOffset = 0;
 
             // TODO: VALIDATE WORD
-            if (ValidateWord()) SubmitWord();
+            ValidateWord();
+            SubmitWord();
           }
           else
           {
@@ -237,7 +238,8 @@ public class GridManager : MonoBehaviour
             typeOffset = 0;
 
             // TODO: VALIDATE WORD
-            if (ValidateWord()) SubmitWord();
+            ValidateWord();
+              SubmitWord();
             // TODO: SCORE WORD
           }
           else
@@ -316,6 +318,7 @@ public class GridManager : MonoBehaviour
 
   private void SubmitWord()
   {
+    runningScore = 0;
     while (tokensUsed.Count > 0)
     {
       Token t = tokensUsed.Pop();
@@ -333,7 +336,8 @@ public class GridManager : MonoBehaviour
     User.player.DrawToMaxHand();
     User.player.SetScore(User.player.score + runningScore);
     currentWord = "";
-    playerManager.ChangeActivePlayer(Computer.player);
+    Debug.Log(runningScore);
+    if (runningScore > 0) playerManager.ChangeActivePlayer(Computer.player);
   }
 
 
@@ -382,14 +386,14 @@ public class GridManager : MonoBehaviour
       int x = (int)startCell.x;
       for (int i = 0; i < letters.Length; i++)
       {
-        tiles[x, (int)startCell.y].ChangeLetter(letters[i].ToString());
-        tiles[x, (int)startCell.y].ChangeColor(color);
-        tiles[x, (int)startCell.y].LockTyping();
-
         LetterValues letterVal;
         if (Enum.TryParse(letters[i].ToString(), out letterVal)) score += (int)letterVal;
         score += tiles[x, (int)startCell.y].pointValue;
         score = tiles[x, (int)startCell.y].PointModifier(score);
+
+        tiles[x, (int)startCell.y].ChangeLetter(letters[i].ToString());
+        tiles[x, (int)startCell.y].ChangeColor(color);
+        tiles[x, (int)startCell.y].LockTyping();
         x++;
       }
     } 
@@ -399,14 +403,14 @@ public class GridManager : MonoBehaviour
       int y = (int)startCell.y;
       for (int i = 0; i < letters.Length; i++)
       {
-        tiles[(int)startCell.x, y].ChangeLetter(letters[i].ToString());
-        tiles[(int)startCell.x, y].ChangeColor(color);
-        tiles[(int)startCell.x, y].LockTyping();
-
         LetterValues letterVal;
         if (Enum.TryParse(letters[i].ToString(), out letterVal)) score += (int)letterVal;
         score += tiles[(int)startCell.x, y].pointValue;
         score = tiles[(int)startCell.x, y].PointModifier(score);
+
+        tiles[(int)startCell.x, y].ChangeLetter(letters[i].ToString());
+        tiles[(int)startCell.x, y].ChangeColor(color);
+        tiles[(int)startCell.x, y].LockTyping();
         y--;
       }
     }

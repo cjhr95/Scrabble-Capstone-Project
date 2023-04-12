@@ -97,7 +97,7 @@ public class TileUnit : MonoBehaviour
 
   public void ChangeColor(Color c)
   {
-    renderer.color = c;
+    if (!locked) renderer.color = c;
   }
 
   public void LockTyping()

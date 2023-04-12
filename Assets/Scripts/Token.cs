@@ -41,6 +41,7 @@ namespace Assets
     public int pointValue { get; private set; }         // The value of the token
     private int minPoint;
     private float creationTime;
+    private float currentTime;
     PlayerManager playerManager;
     [SerializeField] private TextMeshProUGUI text;
     [SerializeField] private TextMeshProUGUI pointValueText;
@@ -56,6 +57,7 @@ namespace Assets
       text.text = tokenLetter;
 
       creationTime = Time.time;
+      currentTime = Time.time;
 
       LetterValues letterVal;
       if (Enum.TryParse(tokenLetter, out letterVal))
@@ -65,13 +67,18 @@ namespace Assets
       else pointValue = 0;
 
       minPoint = pointValue;
+      pointValue += TOKEN_BONUS_LIFETIME;
     }
 
     public void Update()
     {
       text.transform.position = gameObject.transform.position;
       int newPointVal = minPoint + (TOKEN_BONUS_LIFETIME - deltaTime());
-      if (playerManager.IsHumanPlayer()) pointValue = newPointVal >= minPoint ? newPointVal : minPoint;
+      if (playerManager.IsHumanPlayer())
+      {
+        pointValue = newPointVal >= minPoint ? newPointVal : minPoint;
+        currentTime = Time.time;
+      }
       pointValueText.text = pointValue.ToString();
     }
 
@@ -102,7 +109,7 @@ namespace Assets
 
     private int deltaTime()
     {
-      return (int) (Time.time - creationTime);
+      return (int) (currentTime - creationTime);
     }
   }
 }
