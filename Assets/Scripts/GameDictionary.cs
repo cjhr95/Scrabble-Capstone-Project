@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using UnityEngine.UIElements;
 
@@ -50,7 +51,8 @@ namespace Game
         List<string> words = new List<string>();
         while (sr.Peek() >= 0)
         {
-          if (sr.ReadLine().Length == length) words.Add(sr.ReadLine());
+          string s = sr.ReadLine();
+          if (s.Length == length) words.Add(s);
         }
         if (words.Count > 0)
         {

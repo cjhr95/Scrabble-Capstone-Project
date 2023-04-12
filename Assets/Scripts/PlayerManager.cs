@@ -1,7 +1,9 @@
 using Assets;
+using Game;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SocialPlatforms.Impl;
@@ -19,6 +21,7 @@ public class PlayerManager : MonoBehaviour
   [SerializeField] private int DefaultTurnTimeS;
   [SerializeField] private TextMeshProUGUI winnerText;
   [SerializeField] private Button UserPassTurnButton;
+  private GridManager gridManager;
   private Player ActivePlayer;
   private float TurnStartTimeS;
   private float TurnEndTimeS;
@@ -27,6 +30,7 @@ public class PlayerManager : MonoBehaviour
   void Start()
   {
     LetterPoolManager.FillPool(PoolStyle.Scrabble);
+    gridManager = FindAnyObjectByType<GridManager>();
     TurnEndTimeS = 0;
     TurnStartTimeS = 0;
     GameOver = false;
@@ -122,7 +126,11 @@ public class PlayerManager : MonoBehaviour
     }
     ActivePlayer = p;
     if (IsHumanPlayer()) winnerText.text = "Your turn";
-    else winnerText.text = "Opponent's turn";
+    else
+    {
+      winnerText.text = "Opponent's turn";
+      StartCoroutine(ComputerTurn());
+    }
     TurnStartTimeS = Time.time;
   }
 
@@ -146,4 +154,67 @@ public class PlayerManager : MonoBehaviour
   }
 
   public bool IsHumanPlayer() { return ActivePlayer != null && ActivePlayer.playerType == PlayerType.Human; }
+
+  IEnumerator ComputerTurn()
+  {
+    System.Random random = new System.Random();
+    bool foundSolution = false;
+    int score = 0;
+    while (!foundSolution)
+    {
+      yield return new WaitForSecondsRealtime(2.0f);
+      string word = GameDictionary.GenerateWord(random.Next(3, 7));
+      for (int y = 0; y < gridManager.height; y++)
+      {
+        for (int x = 0; x < gridManager.width; x++)
+        {
+          for (int i = 0; i < word.Length; i++)
+          {
+            if (gridManager.tiles[y, x].GetLetter() == word[i].ToString())
+            {
+              bool valid = true;
+
+              for (int j = Math.Max(y - i, 0); j < Math.Min(y + (word.Length - i), gridManager.width); j++)
+              {
+                if (gridManager.tiles[j, x].GetLetter() != "" && gridManager.tiles[j, x].GetLetter() != word[j - (y - i)].ToString()) valid = false;
+              }
+
+              if (valid)
+              {
+                if (y - i < 0) continue;
+                if (!gridManager.AddWordToGrid(new Vector2(y - i, x), word, true, Color.magenta, out score)) continue;
+                Computer.player.SetScore(Computer.player.score + score);
+                foundSolution = true;
+                ChangeActivePlayer(User.player); 
+                yield break;
+              }
+
+              // Vertical
+              valid = true;
+
+              for (int j = Math.Min(x + i, gridManager.height); j > Math.Max(x - (word.Length - i), 0); j--)
+              {
+                if (gridManager.tiles[y, j].GetLetter() != "") 
+                  if (gridManager.tiles[y, j].GetLetter() != word[(x + i) - j].ToString())
+                    valid = false;
+              }
+
+              if (valid)
+              {
+                if (x + i > gridManager.height) continue;
+                if (!gridManager.AddWordToGrid(new Vector2(y, x + i), word, false, Color.magenta, out score)) continue;
+                Computer.player.SetScore(Computer.player.score + score);
+                foundSolution = true;
+                ChangeActivePlayer(User.player);
+                yield break;
+              }
+            }
+          }
+          if (foundSolution) break;
+        }
+        if (foundSolution) break;
+      }
+      if (foundSolution) break;
+    }
+  }
 }

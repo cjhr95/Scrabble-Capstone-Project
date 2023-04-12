@@ -12,7 +12,7 @@ public class GridManager : MonoBehaviour
   // ####################################### General Variables #######################################
   [SerializeField] public int width, height;            // Width and Height of the grid (in tiles)
   [SerializeField] private TileUnit tilePrefab;         // Placeholder to access the tile prefab
-  private TileUnit[,] tiles;                            // Grid array
+  public TileUnit[,] tiles;                            // Grid array
   public bool firstWordPlaced { get; private set; }     // Flag to force first word to intersect center.
   private Vector2 centerOfGrid;                         // Location of the center of tile array.
 
@@ -145,9 +145,7 @@ public class GridManager : MonoBehaviour
             typeOffset = 0;
 
             // TODO: VALIDATE WORD
-            ValidateWord();
-            // TODO: SCORE WORD
-            SubmitWord();
+            if (ValidateWord()) SubmitWord();
           }
           else
           {
@@ -239,9 +237,8 @@ public class GridManager : MonoBehaviour
             typeOffset = 0;
 
             // TODO: VALIDATE WORD
-            ValidateWord();
+            if (ValidateWord()) SubmitWord();
             // TODO: SCORE WORD
-            SubmitWord();
           }
           else
           {
@@ -277,19 +274,16 @@ public class GridManager : MonoBehaviour
           }
         }
       }
-      else
-      {
-        playerManager.ComputerPassTurn();
-      }
     }
   }
 
-  private void ValidateWord()
+  private bool ValidateWord()
   {
     if (!GameDictionary.ValidateWord(currentWord))
     {
       while (wordTiles.Count > 0) wordTiles.Pop().ChangeLetter("");
       while (tokensUsed.Count > 0) User.player.AddToHand(tokensUsed.Pop());
+      return false;
     }
     // Check if first word has been placed
     if (!firstWordPlaced)
@@ -314,8 +308,10 @@ public class GridManager : MonoBehaviour
         }
         while (tokensUsed.Count > 0) User.player.AddToHand(tokensUsed.Pop());
         wordTiles.Clear();
+        return false;
       }
     }
+    return true;
   }
 
   private void SubmitWord()
@@ -376,26 +372,41 @@ public class GridManager : MonoBehaviour
   // Returns:     A bool saying whether or not the word could be written there.
   //              Note that true represents that the word *was* written, not
   //              attempted.
-  public bool AddWordToGrid(Vector2 startCell, string word, bool horizontal)
+  public bool AddWordToGrid(Vector2 startCell, string word, bool horizontal, Color color, out int score)
   {
     char[] letters = word.ToCharArray();
+    score = 0;
     if (horizontal)
     {
-      if (width - (int)startCell.x - (letters.Length - 1) < 0) return false;
+      if (width - (int)startCell.x - (letters.Length) <= 0) return false;
       int x = (int)startCell.x;
       for (int i = 0; i < letters.Length; i++)
       {
         tiles[x, (int)startCell.y].ChangeLetter(letters[i].ToString());
+        tiles[x, (int)startCell.y].ChangeColor(color);
+        tiles[x, (int)startCell.y].LockTyping();
+
+        LetterValues letterVal;
+        if (Enum.TryParse(letters[i].ToString(), out letterVal)) score += (int)letterVal;
+        score += tiles[x, (int)startCell.y].pointValue;
+        score = tiles[x, (int)startCell.y].PointModifier(score);
         x++;
       }
     } 
     else
     {
-      if ((int)startCell.y - (letters.Length - 1) < 0) return false;
+      if ((int)startCell.y - (letters.Length) <= 0) return false;
       int y = (int)startCell.y;
       for (int i = 0; i < letters.Length; i++)
       {
         tiles[(int)startCell.x, y].ChangeLetter(letters[i].ToString());
+        tiles[(int)startCell.x, y].ChangeColor(color);
+        tiles[(int)startCell.x, y].LockTyping();
+
+        LetterValues letterVal;
+        if (Enum.TryParse(letters[i].ToString(), out letterVal)) score += (int)letterVal;
+        score += tiles[(int)startCell.x, y].pointValue;
+        score = tiles[(int)startCell.x, y].PointModifier(score);
         y--;
       }
     }
